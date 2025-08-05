@@ -1,1 +1,1 @@
-# Coordination-script-and-simulators-for-tinyIoT
+# Coordination script and simulators for tinyIoT
