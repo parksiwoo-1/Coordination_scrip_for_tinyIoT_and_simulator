@@ -49,11 +49,14 @@ if __name__ == '__main__':
     print("[COORD] Starting simulator_temp...")
     device1 = subprocess.Popen([
         'python3', 'devices/simulator_temp.py',
-        '--input-data', 'test data/test_data_temp.csv',
+        '--Mode', 'random',
+        '--Data-Type', 'float',
+        '--Min', '20.0', '--Max', '35.0',
         '--Frequency', '2',
         '--Target-Server', '127.0.0.1',
         '--Port', '3000',
-        '--Registration', '1'
+        '--Registration', '1',
+        '--Protocol', 'mqtt'
     ])
 
     if not wait_for_process("simulator_temp.py"):
@@ -65,11 +68,14 @@ if __name__ == '__main__':
     print("[COORD] Starting simulator_humid...")
     device2 = subprocess.Popen([
         'python3', 'devices/simulator_humid.py',
-        '--input-data', 'test data/test_data_humid.csv',
+        '--Mode', 'random',
+        '--Data-Type', 'int',
+        '--Min', '50', '--Max', '90',
         '--Frequency', '2',
         '--Target-Server', '127.0.0.1',
         '--Port', '3000',
-        '--Registration', '1'
+        '--Registration', '1',
+        '--Protocol', 'mqtt'
     ])
 
     try:
