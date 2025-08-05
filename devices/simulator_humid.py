@@ -4,6 +4,8 @@ import time
 import requests
 import socket
 import sys
+import random
+import string
 
 # ----------- oneM2M Basic Settings ----------- 
 class Headers:
@@ -43,7 +45,7 @@ def check_and_create_ae(base_url, cse, ae):
             return True
     except:
         pass
-
+    
     headers = Headers(content_type='ae').headers
     body = {
         "m2m:ae": {
@@ -61,7 +63,7 @@ def check_and_create_cnt(base_url, cse, ae, cnt):
             return True
     except:
         pass
-
+    
     headers = Headers(content_type='cnt').headers
     body = {
         "m2m:cnt": {
@@ -86,47 +88,61 @@ def check_server_reachable(host, port):
     except:
         return False
 
+# ----------- Random Value Generator ----------- 
+def generate_random_value(data_type, min_val=None, max_val=None, length=None):
+    if data_type == 'int':
+        return str(random.randint(int(min_val), int(max_val)))
+    elif data_type == 'float':
+        return f"{random.uniform(min_val, max_val):.2f}"
+    elif data_type == 'string':
+        return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+    else:
+        return "0"
+
 # ----------- Main ----------- 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input-data', required=True)
+    parser.add_argument('--input-data')
     parser.add_argument('--Frequency', type=int, required=True)
     parser.add_argument('--Target-Server', required=True)
     parser.add_argument('--Port', required=True)
     parser.add_argument('--Registration', type=int, default=0)
+    parser.add_argument('--Mode', choices=['csv', 'random'], default='csv')
+    parser.add_argument('--Data-Type', choices=['int', 'float', 'string'])
+    parser.add_argument('--Min', type=float)
+    parser.add_argument('--Max', type=float)
+    parser.add_argument('--Length', type=int)
+    parser.add_argument('--Protocol', choices=['http', 'mqtt'], default='http')
     args = parser.parse_args()
 
     CSE = "TinyIoT"
     AE = "humidSensor"
     CNT = "humidity"
-
     BASE_URL = f"http://{args.Target_Server}:{args.Port}"
 
-    # Validate server and port
     print("[CHECK] Validating server and port...")
     if not check_server_reachable(args.Target_Server, args.Port):
         print(f"[ERROR] Cannot connect to server: {args.Target_Server}:{args.Port}")
         sys.exit(1)
 
-    # Resource registration
     if args.Registration == 1:
         print("[HUMID] Creating AE...")
         check_and_create_ae(BASE_URL, CSE, AE)
         print("[HUMID] Creating CNT...")
         check_and_create_cnt(BASE_URL, CSE, AE, CNT)
 
-    # Load CSV
-    try:
-        with open(args.input_data, 'r') as file:
-            reader = list(csv.reader(file))
-            data = [row[0].strip() for row in reader if row]
-    except Exception as e:
-        print(f"[ERROR] Failed to open CSV file: {e}")
-        sys.exit(1)
-
-    if not data:
-        print("[ERROR] CSV data is empty.")
-        sys.exit(1)
+    data = []
+    if args.Mode == 'csv':
+        try:
+            with open(args.input_data, 'r') as file:
+                reader = list(csv.reader(file))
+                data = [row[0].strip() for row in reader if row]
+        except Exception as e:
+            print(f"[ERROR] Failed to open CSV file: {e}")
+            sys.exit(1)
+        if not data:
+            print("[ERROR] CSV data is empty.")
+            sys.exit(1)
 
     print("[HUMID] Starting data transmission...")
     index = 0
@@ -135,22 +151,29 @@ if __name__ == '__main__':
     wait_seconds = 5
 
     while True:
-        if index >= len(data):
-            print("[INFO] All data has been sent. Exiting.")
-            break
+        if args.Mode == 'csv':
+            if index >= len(data):
+                print("[INFO] All data has been sent. Exiting.")
+                break
+            value = data[index]
+        else:
+            value = generate_random_value(args.Data_Type, args.Min, args.Max, args.Length)
 
-        value = data[index]
-        success = send_cin(BASE_URL, CSE, AE, CNT, value)
+        if args.Protocol == 'http':
+            success = send_cin(BASE_URL, CSE, AE, CNT, value)
+        elif args.Protocol == 'mqtt':
+            print(f"[MQTT] Sending via MQTT: {value} (NOT IMPLEMENTED)")
+            success = True
 
         if success:
             print(f"[HUMID] Successfully sent: {value}")
-            index += 1
+            if args.Mode == 'csv':
+                index += 1
             error_count = 0
         else:
             error_count += 1
             print(f"[ERROR] Failed to send: {value} (Retrying in {wait_seconds} seconds)")
             time.sleep(wait_seconds)
-
             if error_count >= error_threshold:
                 print("[ERROR] Repeated failures detected. Server might be down. Exiting.")
                 break
