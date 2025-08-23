@@ -12,12 +12,11 @@ class Headers:
             'X-M2M-RI': ri,
             'Content-Type': f'application/json;ty={self.get_content_type(content_type)}' if content_type else 'application/json'
         }
-
     @staticmethod
     def get_content_type(content_type):
         return {'ae': 2, 'cnt': 3, 'cin': 4}.get(content_type)
 
-getHeaders = {
+GET_HEADERS = {
     'Accept': 'application/json',
     'X-M2M-Origin': 'CAdmin',
     'X-M2M-RVI': '3',
@@ -27,34 +26,35 @@ getHeaders = {
 # ---------- Utility ----------
 def request_post(url, headers, body):
     try:
-        res = requests.post(url, headers=headers, json=body)
+        res = requests.post(url, headers=headers, json=body, timeout=config.REQUEST_TIMEOUT)
         return res.status_code == 201
     except Exception as e:
         print(f"[ERROR] Failed to send POST request: {e}")
         return False
 
-def check_server_reachable(host, port):
+def check_http_reachable():
     try:
-        with socket.create_connection((host, int(port)), timeout=config.REQUEST_TIMEOUT):
+        with socket.create_connection((config.HTTP_HOST, int(config.HTTP_PORT)), timeout=config.REQUEST_TIMEOUT):
             return True
     except:
         return False
 
-def generate_random_value(data_type, min_val=None, max_val=None, length=None):
-    if data_type == 'int':
-        return str(random.randint(int(min_val), int(max_val)))
-    elif data_type == 'float':
-        return f"{random.uniform(min_val, max_val):.2f}"
-    elif data_type == 'string':
+def generate_random_value_from_profile(profile):
+    dt = profile['data_type']
+    if dt == 'int':
+        return str(random.randint(int(profile['min']), int(profile['max'])))
+    if dt == 'float':
+        return f"{random.uniform(float(profile['min']), float(profile['max'])):.2f}"
+    if dt == 'string':
+        length = int(profile.get('length') or 8)
         return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
-    else:
-        return "0"
+    return "0"
 
 # ---------- Resource Functions ----------
 def check_and_create_ae(base_url, cse, ae):
     target = f"{base_url}/{cse}/{ae}"
     try:
-        if requests.get(target, headers=getHeaders).status_code == 200:
+        if requests.get(target, headers=GET_HEADERS, timeout=config.REQUEST_TIMEOUT).status_code == 200:
             return True
     except:
         pass
@@ -65,7 +65,7 @@ def check_and_create_ae(base_url, cse, ae):
 def check_and_create_cnt(base_url, cse, ae, cnt):
     target = f"{base_url}/{cse}/{ae}/{cnt}"
     try:
-        if requests.get(target, headers=getHeaders).status_code == 200:
+        if requests.get(target, headers=GET_HEADERS, timeout=config.REQUEST_TIMEOUT).status_code == 200:
             return True
     except:
         pass
@@ -80,49 +80,43 @@ def send_cin(base_url, cse, ae, cnt, value):
 
 # ---------- Main ----------
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--input-data')
-    parser.add_argument('--Frequency', type=int, required=True)
-    parser.add_argument('--Target-Server', required=True)
-    parser.add_argument('--Port', required=True)
-    parser.add_argument('--Registration', type=int, default=0)
-    parser.add_argument('--Mode', choices=['csv', 'random'], default='csv')
-    parser.add_argument('--Data-Type', choices=['int', 'float', 'string'])
-    parser.add_argument('--Min', type=float)
-    parser.add_argument('--Max', type=float)
-    parser.add_argument('--Length', type=int)
-    parser.add_argument('--Protocol', choices=['http', 'mqtt'], default='http')
-    args = parser.parse_args()
+    p = argparse.ArgumentParser()
+    p.add_argument('--Frequency', type=int, required=True)
+    p.add_argument('--Registration', type=int, default=0)
+    p.add_argument('--Mode', choices=['csv', 'random'], default='csv')
+    p.add_argument('--Protocol', choices=['http', 'mqtt'], default='http')
+    args = p.parse_args()
 
     CSE, AE, CNT = config.CSE_NAME, "humidSensor", "humidity"
 
-    if args.Protocol == 'http':
-        BASE_URL = f"http://{args.Target_Server}:{args.Port}"
-        print("[CHECK] Validating server and port...")
-        if not check_server_reachable(args.Target_Server, args.Port):
-            print(f"[ERROR] Cannot connect to server: {args.Target_Server}:{args.Port}")
-            sys.exit(1)
-
+    base_url = f"http://{config.HTTP_HOST}:{config.HTTP_PORT}"
     mqtt_client = None
-    if args.Protocol == 'mqtt':
-        mqtt_client = MqttOneM2MClient(args.Target_Server, args.Port, "ChumidSensor", CSE)
+
+    if args.Protocol == 'http':
+        print("[CHECK] Validating HTTP server/port from config...")
+        if not check_http_reachable():
+            print(f"[ERROR] Cannot connect to HTTP server: {config.HTTP_HOST}:{config.HTTP_PORT}")
+            sys.exit(1)
+    else:
+        mqtt_client = MqttOneM2MClient(config.MQTT_HOST, config.MQTT_PORT, "ChumidSensor", CSE)
         if not mqtt_client.connect():
             sys.exit(1)
 
     if args.Registration == 1:
         print("[HUMID] Registering AE and CNT...")
         if args.Protocol == 'http':
-            check_and_create_ae(BASE_URL, CSE, AE)
-            check_and_create_cnt(BASE_URL, CSE, AE, CNT)
+            check_and_create_ae(base_url, CSE, AE)
+            check_and_create_cnt(base_url, CSE, AE, CNT)
         else:
             mqtt_client.create_ae(AE)
             mqtt_client.create_cnt(AE, CNT)
 
     data = []
     if args.Mode == 'csv':
+        path = config.HUMID_CSV
         try:
-            with open(args.input_data, 'r') as file:
-                reader = list(csv.reader(file))
+            with open(path, 'r') as f:
+                reader = list(csv.reader(f))
                 data = [row[0].strip() for row in reader if row]
         except Exception as e:
             print(f"[ERROR] Failed to open CSV file: {e}")
@@ -136,16 +130,21 @@ if __name__ == '__main__':
     error_count = 0
 
     while True:
-        value = data[index] if args.Mode == 'csv' else generate_random_value(args.Data_Type, args.Min, args.Max, args.Length)
-
-        if args.Protocol == 'http':
-            success = send_cin(BASE_URL, CSE, AE, CNT, value)
+        if args.Mode == 'csv':
+            value = data[index]
         else:
-            success = mqtt_client.send_cin(AE, CNT, value)
+            value = generate_random_value_from_profile(config.HUMID_PROFILE)
+
+        success = (
+            send_cin(base_url, CSE, AE, CNT, value)
+            if args.Protocol == 'http'
+            else mqtt_client.send_cin(AE, CNT, value)
+        )
 
         if success:
             print(f"[HUMID] Successfully sent: {value}")
-            index += 1 if args.Mode == 'csv' else 0
+            if args.Mode == 'csv':
+                index += 1
             error_count = 0
         else:
             error_count += 1
