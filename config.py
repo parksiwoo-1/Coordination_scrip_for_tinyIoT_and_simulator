@@ -1,16 +1,42 @@
-# Server settings
+# Server/TinyIoT
 SERVER_EXEC = "/home/parks/tinyIoT/source/server/server"
-SERVER_HOST = "127.0.0.1"
-SERVER_PORT = "3000"
-CSE_NAME = "TinyIoT"
-SERVER_URL = f"http://{SERVER_HOST}:{SERVER_PORT}/{CSE_NAME}"
 
-# Time settings
-WAIT_SERVER_TIMEOUT = 30        # seconds
-WAIT_PROCESS_TIMEOUT = 10       # seconds
-RETRY_WAIT_SECONDS = 5          # seconds
-SEND_ERROR_THRESHOLD = 5        # count
-PROCESS_START_DELAY = 2         # seconds
-REQUEST_TIMEOUT = 3             # socket timeout
-DATA_SEND_INTERVAL = 2          # default frequency if not overridden by args
+# oneM2M CSE
+CSE_NAME = "tinyiot"
 
+# HTTP (REST)
+HTTP_HOST = "127.0.0.1"
+HTTP_PORT = 3000  # int 권장
+HTTP_BASE = f"http://{HTTP_HOST}:{HTTP_PORT}"
+CSE_URL = f"{HTTP_BASE}/{CSE_NAME}"
+
+# MQTT (Mosquitto)
+MQTT_HOST = "127.0.0.1"
+MQTT_PORT = 1883  # int
+
+# Time & Retry
+WAIT_SERVER_TIMEOUT   = 30  # seconds
+WAIT_PROCESS_TIMEOUT  = 10  # seconds
+RETRY_WAIT_SECONDS    = 5   # seconds
+SEND_ERROR_THRESHOLD  = 5   # count
+PROCESS_START_DELAY   = 2   # seconds
+REQUEST_TIMEOUT       = 3   # seconds
+
+# CSV Paths
+TEMP_CSV  = "test data/test_data_temp.csv"
+HUMID_CSV = "test data/test_data_humid.csv"
+
+# ---------- Device Profiles (used in random mode) ----------
+TEMP_PROFILE = {
+    "data_type": "float",   # int | float | string
+    "min": 20.0,
+    "max": 35.0,
+    "length": 8,            # string일 때만 사용
+}
+
+HUMID_PROFILE = {
+    "data_type": "int",     # int | float | string
+    "min": 50,
+    "max": 90,
+    "length": 8,
+}
