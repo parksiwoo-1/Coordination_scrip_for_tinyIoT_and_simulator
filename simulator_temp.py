@@ -87,7 +87,8 @@ if __name__ == '__main__':
     p.add_argument('--Protocol', choices=['http', 'mqtt'], default='http')
     args = p.parse_args()
 
-    CSE, AE, CNT = config.CSE_NAME, "tempSensor", "temperature"
+    CSE_CSI, CSE_RN = config.CSE_NAME, config.CSE_RN
+    AE, CNT = "tempSensor", "temperature"
 
     # 프로토콜별 대상은 전부 config에서
     base_url = f"http://{config.HTTP_HOST}:{config.HTTP_PORT}"
@@ -99,7 +100,12 @@ if __name__ == '__main__':
             print(f"[ERROR] Cannot connect to HTTP server: {config.HTTP_HOST}:{config.HTTP_PORT}")
             sys.exit(1)
     else:
-        mqtt_client = MqttOneM2MClient(config.MQTT_HOST, config.MQTT_PORT, "CtempSensor", CSE)
+        mqtt_client = MqttOneM2MClient(
+            config.MQTT_HOST, config.MQTT_PORT,
+            origin="CtempSensor",
+            cse_csi=CSE_CSI,    # 토픽에 사용 (/oneM2M/.../tinyiot/...)
+            cse_rn=CSE_RN       # 페이로드 "to"에 사용 (TinyIoT/...)
+        )
         if not mqtt_client.connect():
             sys.exit(1)
 
@@ -107,11 +113,15 @@ if __name__ == '__main__':
     if args.Registration == 1:
         print("[TEMP] Registering AE and CNT...")
         if args.Protocol == 'http':
-            check_and_create_ae(base_url, CSE, AE)
-            check_and_create_cnt(base_url, CSE, AE, CNT)
+            check_and_create_ae(base_url, CSE_CSI, AE)
+            check_and_create_cnt(base_url, CSE_CSI, AE, CNT)
         else:
-            mqtt_client.create_ae(AE)
-            mqtt_client.create_cnt(AE, CNT)
+            if not mqtt_client.create_ae(AE):
+                print("[ERROR] MQTT AE creation failed.")
+                sys.exit(1)
+            if not mqtt_client.create_cnt(AE, CNT):
+                print("[ERROR] MQTT CNT creation failed.")
+                sys.exit(1)
 
     # 데이터 소스 준비
     data = []
@@ -140,7 +150,7 @@ if __name__ == '__main__':
 
         # 전송
         success = (
-            send_cin(base_url, CSE, AE, CNT, value)
+            send_cin(base_url, CSE_CSI, AE, CNT, value)
             if args.Protocol == 'http'
             else mqtt_client.send_cin(AE, CNT, value)
         )
