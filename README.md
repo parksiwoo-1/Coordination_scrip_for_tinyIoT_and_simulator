@@ -1,8 +1,12 @@
 # Coordination script and Device simulators for tinyIoT
 
+
+
 ## coordination 스크립트 & 디바이스 시뮬레이터
 
 이 프로젝트는 tinyIoT 서버에 임의의 온도와 습도 데이터를 전송하기 위해 개발된 디바이스 시뮬레이터와 이 모든 과정과 동작을 제어하는 coordination 스크립트로 구성되어 있습니다. coordination 스크립트를 통해 tinyIoT 서버와 디바이스 시뮬레이터들을 손쉽게 실행하고 관리할 수 있습니다. 디바이스 시뮬레이터들은 onem2m표준을 준수하며, HTTP 또는 MQTT 프로토콜을 사용하여 데이터(온도, 습도)를 전송합니다.
+
+
 
 ## 파일 구성
 
@@ -14,6 +18,8 @@
 - `test data/test_data_temp.csv`: 온도 데이터 CSV 파일
 - `test data/test_data_humid.csv`: 습도 데이터 CSV 파일
 
+
+
 ## 주요 기능
 
 - **통합 제어**: coordination.py 스크립트 하나로 TinyIoT 서버와 여러 디바이스 시뮬레이터를 순차적으로 실행하고 종료합니다.
@@ -24,11 +30,15 @@
 - **다중 프로토콜 지원**: HTTP 또는 MQTT 프로토콜을 선택하여 데이터를 전송할 수 있습니다.
 - **자동 등록**: 시뮬레이터 시작 시, -Registration 옵션을 통해 oneM2M AE(Application Entity) 및 CNT(Container) 리소스를 자동으로 생성합니다.
 
+
+
 ## 사용 환경
 
 - **언어**: Python 3
 - **MQTT broker**: mosquitto
 - **IoT**: tinyIoT
+
+
 
 ## 환경 설치
 
@@ -40,6 +50,7 @@
 ```c
 pip install paho-mqtt requests
 ```
+
 
 ### 2. MQTT 브로커
 
@@ -55,11 +66,13 @@ sudo apt install mosquitto mosquitto-clients
 sudo systemctl start mosquitto
 ```
 
+
 ### 3. tinyIoT
 
 https://github.com/seslabSJU/tinyIoT
 
 이것을 참조하여 tinyIoT에 대한 이해와 설치를 하면 된다.
+
 
 ### 4. coordination 스크립트 &  디바이스 시뮬레이터
 
@@ -71,6 +84,8 @@ git clone https://github.com/parksiwoo-1/Coordination_script_and_Device_simulato
 
 원하는 경로로 진입하여 해당 명령어를 입력하면 한번에 클론할 수 있다.
 
+
+
 ## 실행 방법
 
 ### 1. 클론 한 경로로 진입
@@ -78,6 +93,7 @@ git clone https://github.com/parksiwoo-1/Coordination_script_and_Device_simulato
 ```c
 cd Coordination_script_and_Device_simulators_for_tinyIoT
 ```
+
 
 ### **2. coordination.py** (전체 제어)
 
