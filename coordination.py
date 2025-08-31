@@ -16,7 +16,6 @@ def wait_for_server(timeout=config.WAIT_SERVER_TIMEOUT):
                 return True
         except requests.exceptions.RequestException:
             pass
-        time.sleep(1)
     print("[ERROR] Unable to connect to tinyIoT server.")
     return False
 
@@ -30,7 +29,6 @@ def wait_for_process(name, timeout=config.WAIT_PROCESS_TIMEOUT):
                 return True
         except subprocess.CalledProcessError:
             pass
-        time.sleep(1)
     print(f"[ERROR] Failed to detect running process: {name}.")
     return False
 
@@ -44,15 +42,15 @@ if __name__ == '__main__':
         except Exception: pass
         sys.exit(1)
 
-    PROTOCOL_1     = 'mqtt'
-    MODE_1         = 'random'
-    FREQUENCY_1    = 2   # seconds
-    REGISTRATION_1 = 1
+    PROTOCOL_1     = 'http'     # http OR mqtt
+    MODE_1         = 'random'   # csv OR random
+    FREQUENCY_1    = 2          # seconds
+    REGISTRATION_1 = 1          # 0 OR 1
 
-    PROTOCOL_2     = 'mqtt'
-    MODE_2         = 'random'
-    FREQUENCY_2    = 2   # seconds
-    REGISTRATION_2 = 1
+    PROTOCOL_2     = 'http'     # http OR mqtt
+    MODE_2         = 'random'   # csv OR random
+    FREQUENCY_2    = 2          # seconds
+    REGISTRATION_2 = 1          # 0 OR 1
 
     print("[COORD] Starting simulator_temp...")
     device1 = subprocess.Popen([
