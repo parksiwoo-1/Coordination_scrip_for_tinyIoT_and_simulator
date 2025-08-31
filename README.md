@@ -66,7 +66,8 @@ sudo apt install mosquitto mosquitto-clients
 #listener 1883
 #protocol mqtt
 을 추가하면 된다.
-<img width="916" height="142" alt="image" src="https://github.com/user-attachments/assets/04c09cec-981e-4e83-933d-fb587df1436a" />
+<img width="902" height="129" alt="image" src="https://github.com/user-attachments/assets/8141a200-901c-44bd-9569-2ed83651e802" />
+
 
 
 - 실행:
