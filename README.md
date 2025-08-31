@@ -104,7 +104,7 @@ git clone https://github.com/parksiwoo-1/Coordination_script_and_Device_simulato
 ```c
 cd tinyIoT/script
 ```
-
+본인이 설정한 경로에 맞게 입력
 
 ### **2. coordination.py** (전체 제어)
 
