@@ -60,6 +60,15 @@ pip install paho-mqtt requests
 sudo apt install mosquitto mosquitto-clients
 ```
 
+- 설정:
+설치한 경로에서 mosquitto.conf 파일을 찾아 수정을 해야 된다.
+
+#listener 1883
+#protocol mqtt
+을 추가하면 된다.
+<img width="916" height="142" alt="image" src="https://github.com/user-attachments/assets/04c09cec-981e-4e83-933d-fb587df1436a" />
+
+
 - 실행:
 
 ```c
