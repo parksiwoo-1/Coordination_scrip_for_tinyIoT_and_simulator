@@ -93,6 +93,7 @@ git clone https://github.com/parksiwoo-1/Coordination_script_and_Device_simulato
 ```
 
 원하는 경로로 진입하여 해당 명령어를 입력하면 한번에 클론할 수 있다.
+(ex. tinyIoT/script)
 
 
 
@@ -101,7 +102,7 @@ git clone https://github.com/parksiwoo-1/Coordination_script_and_Device_simulato
 ### 1. 클론 한 경로로 진입
 
 ```c
-cd Coordination_script_and_Device_simulators_for_tinyIoT
+cd tinyIoT/script
 ```
 
 
