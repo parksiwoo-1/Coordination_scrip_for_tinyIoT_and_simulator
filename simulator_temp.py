@@ -2,16 +2,28 @@ import argparse, csv, time, requests, socket, sys, random, string
 from mqtt_client import MqttOneM2MClient
 import config
 
+# ---- Timeouts/Jitter (fallback if not in config) ----
+CONNECT_TIMEOUT = getattr(config, 'CONNECT_TIMEOUT', 2)
+READ_TIMEOUT    = getattr(config, 'READ_TIMEOUT', 10)
+JITTER_MAX      = getattr(config, 'JITTER_MAX', 0.3)
+CNT_MNI         = getattr(config, 'CNT_MNI', 1000)
+CNT_MBS         = getattr(config, 'CNT_MBS', 10485760)
+
+HTTP = requests.Session()
+
 # ---------- Headers ----------
 class Headers:
-    def __init__(self, content_type=None, origin='CtempSensor', ri='req'):
+    def __init__(self, content_type=None, origin='CAdmin', ri='req'):
         self.headers = {
             'Accept': 'application/json',
             'X-M2M-Origin': origin,
-            'X-M2M-RVI': '3',
+            'X-M2M-RVI': '2a',
             'X-M2M-RI': ri,
-            'Content-Type': f'application/json;ty={self.get_content_type(content_type)}' if content_type else 'application/json'
+            'Content-Type': 'application/json'
         }
+        if content_type:
+            self.headers['Content-Type'] = f'application/json;ty={self.get_content_type(content_type)}'
+
     @staticmethod
     def get_content_type(content_type):
         return {'ae': 2, 'cnt': 3, 'cin': 4}.get(content_type)
@@ -19,22 +31,44 @@ class Headers:
 GET_HEADERS = {
     'Accept': 'application/json',
     'X-M2M-Origin': 'CAdmin',
-    'X-M2M-RVI': '3',
+    'X-M2M-RVI': '2a',
     'X-M2M-RI': 'check'
 }
 
+# ---------- URLs (Hierarchical: RN) ----------
+BASE_URL_RN = f"http://{config.HTTP_HOST}:{config.HTTP_PORT}/{config.CSE_RN}"
+def url_ae(ae):          return f"{BASE_URL_RN}/{ae}"
+def url_cnt(ae, cnt):    return f"{BASE_URL_RN}/{ae}/{cnt}"
+
 # ---------- Utility ----------
-def request_post(url, headers, body):
+def http_get_ok(url):
     try:
-        res = requests.post(url, headers=headers, json=body, timeout=config.REQUEST_TIMEOUT)
-        return res.status_code == 201
+        r = HTTP.get(url, headers=GET_HEADERS, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+        return r.status_code == 200
+    except Exception:
+        return False
+
+def request_post(url, headers, body, kind=""):
+    try:
+        r = HTTP.post(url, headers=headers, json=body, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+        if r.status_code in (200, 201):
+            return True
+        try: text = r.json()
+        except Exception: text = r.text
+        if r.status_code in (403, 409) and "duplicat" in str(text).lower():
+            return True
+        print(f"[ERROR] POST {url} -> {r.status_code} {text}")
+        return False
+    except requests.exceptions.ReadTimeout as e:
+        print(f"[WARN] POST timeout on {url}: {e}")
+        return False
     except Exception as e:
-        print(f"[ERROR] Failed to send POST request: {e}")
+        print(f"[ERROR] POST {url} failed: {e}")
         return False
 
 def check_http_reachable():
     try:
-        with socket.create_connection((config.HTTP_HOST, int(config.HTTP_PORT)), timeout=config.REQUEST_TIMEOUT):
+        with socket.create_connection((config.HTTP_HOST, int(config.HTTP_PORT)), timeout=CONNECT_TIMEOUT):
             return True
     except:
         return False
@@ -50,36 +84,57 @@ def generate_random_value_from_profile(profile):
         return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
     return "0"
 
-# ---------- Resource Functions ----------
-def check_and_create_ae(base_url, cse, ae):
-    target = f"{base_url}/{cse}/{ae}"
-    try:
-        if requests.get(target, headers=GET_HEADERS, timeout=config.REQUEST_TIMEOUT).status_code == 200:
-            return True
-    except:
-        pass
-    headers = Headers(content_type='ae').headers
+# ---------- oneM2M Helpers ----------
+def check_and_create_ae(ae):
+    if http_get_ok(url_ae(ae)):
+        return True
+    hdr  = Headers(content_type='ae').headers
     body = {"m2m:ae": {"rn": ae, "api": "N.temp", "rr": True}}
-    return request_post(f"{base_url}/{cse}", headers, body)
+    return request_post(BASE_URL_RN, hdr, body, "ae")
 
-def check_and_create_cnt(base_url, cse, ae, cnt):
-    target = f"{base_url}/{cse}/{ae}/{cnt}"
+def check_and_create_cnt(ae, cnt):
+    if http_get_ok(url_cnt(ae, cnt)):
+        return True
+    hdr  = Headers(content_type='cnt').headers
+    body = {"m2m:cnt": {"rn": cnt, "mni": CNT_MNI, "mbs": CNT_MBS}}
+    return request_post(url_ae(ae), hdr, body, "cnt")
+
+def get_latest_con(ae, cnt):
+    la = f"{url_cnt(ae, cnt)}/la"
     try:
-        if requests.get(target, headers=GET_HEADERS, timeout=config.REQUEST_TIMEOUT).status_code == 200:
-            return True
-    except:
+        r = HTTP.get(la, headers=GET_HEADERS, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+        if r.status_code == 200:
+            js = r.json()
+            return js.get('m2m:cin', {}).get('con')
+    except Exception:
         pass
-    headers = Headers(content_type='cnt').headers
-    body = {"m2m:cnt": {"rn": cnt}}
-    return request_post(f"{base_url}/{cse}/{ae}", headers, body)
+    return None
 
-def send_cin(base_url, cse, ae, cnt, value):
-    headers = Headers(content_type='cin').headers
+def send_cin_http(ae, cnt, value):
+    hdr  = Headers(content_type='cin').headers  # origin=CAdmin
     body = {"m2m:cin": {"con": value}}
-    return request_post(f"{base_url}/{cse}/{ae}/{cnt}", headers, body)
+    u    = url_cnt(ae, cnt)
+    try:
+        r = HTTP.post(u, headers=hdr, json=body, timeout=(CONNECT_TIMEOUT, READ_TIMEOUT))
+        if r.status_code in (200, 201):
+            return True
+        try: text = r.json()
+        except Exception: text = r.text
+        print(f"[ERROR] POST {u} -> {r.status_code} {text}")
+        return False
+    except requests.exceptions.ReadTimeout:
+        latest = get_latest_con(ae, cnt)
+        if latest == str(value):
+            print("[WARN] POST timed out but verified via /la (stored).")
+            return True
+        print("[WARN] POST timed out and not verified; will retry.")
+        return False
+    except Exception as e:
+        print(f"[ERROR] POST {u} failed: {e}")
+        return False
 
 # ---------- Main ----------
-if __name__ == '__main__':
+def main():
     p = argparse.ArgumentParser()
     p.add_argument('--Frequency', type=int, required=True)
     p.add_argument('--Registration', type=int, default=0)
@@ -87,12 +142,8 @@ if __name__ == '__main__':
     p.add_argument('--Protocol', choices=['http', 'mqtt'], default='http')
     args = p.parse_args()
 
-    CSE_CSI, CSE_RN = config.CSE_NAME, config.CSE_RN
-    AE, CNT = "tempSensor", "temperature"
-
-    # 프로토콜별 대상은 전부 config에서
-    base_url = f"http://{config.HTTP_HOST}:{config.HTTP_PORT}"
-    mqtt_client = None
+    AE, CNT = "CtempSensor", "temperature"
+    mqtt = None
 
     if args.Protocol == 'http':
         print("[CHECK] Validating HTTP server/port from config...")
@@ -100,30 +151,30 @@ if __name__ == '__main__':
             print(f"[ERROR] Cannot connect to HTTP server: {config.HTTP_HOST}:{config.HTTP_PORT}")
             sys.exit(1)
     else:
-        mqtt_client = MqttOneM2MClient(
+        mqtt = MqttOneM2MClient(
             config.MQTT_HOST, config.MQTT_PORT,
             origin="CtempSensor",
-            cse_csi=CSE_CSI,    # 토픽에 사용 (/oneM2M/.../tinyiot/...)
-            cse_rn=CSE_RN       # 페이로드 "to"에 사용 (TinyIoT/...)
+            cse_csi=config.CSE_NAME,
+            cse_rn=config.CSE_RN
         )
-        if not mqtt_client.connect():
+        if not mqtt.connect():
             sys.exit(1)
 
-    # Registration (AE/CNT)
     if args.Registration == 1:
         print("[TEMP] Registering AE and CNT...")
         if args.Protocol == 'http':
-            check_and_create_ae(base_url, CSE_CSI, AE)
-            check_and_create_cnt(base_url, CSE_CSI, AE, CNT)
+            if not check_and_create_ae(AE):
+                print("[ERROR] AE creation failed.")
+                sys.exit(1)
+            time.sleep(0.2)
+            if not check_and_create_cnt(AE, CNT):
+                print("[ERROR] CNT creation failed.")
+                sys.exit(1)
+            time.sleep(0.2)
         else:
-            if not mqtt_client.create_ae(AE):
-                print("[ERROR] MQTT AE creation failed.")
-                sys.exit(1)
-            if not mqtt_client.create_cnt(AE, CNT):
-                print("[ERROR] MQTT CNT creation failed.")
-                sys.exit(1)
+            if not mqtt.create_ae(AE):  sys.exit(1)
+            if not mqtt.create_cnt(AE, CNT): sys.exit(1)
 
-    # 데이터 소스 준비
     data = []
     if args.Mode == 'csv':
         path = config.TEMP_CSV
@@ -143,19 +194,10 @@ if __name__ == '__main__':
     error_count = 0
 
     while True:
-        if args.Mode == 'csv':
-            value = data[index]
-        else:
-            value = generate_random_value_from_profile(config.TEMP_PROFILE)
+        value = data[index] if args.Mode == 'csv' else generate_random_value_from_profile(config.TEMP_PROFILE)
+        ok = send_cin_http(AE, CNT, value) if args.Protocol=='http' else mqtt.send_cin(AE, CNT, value)
 
-        # 전송
-        success = (
-            send_cin(base_url, CSE_CSI, AE, CNT, value)
-            if args.Protocol == 'http'
-            else mqtt_client.send_cin(AE, CNT, value)
-        )
-
-        if success:
+        if ok:
             print(f"[TEMP] Successfully sent: {value}")
             if args.Mode == 'csv':
                 index += 1
@@ -172,7 +214,10 @@ if __name__ == '__main__':
             print("[INFO] All data has been sent. Exiting.")
             break
 
-        time.sleep(args.Frequency)
+        time.sleep(args.Frequency + random.uniform(0, JITTER_MAX))
 
-    if mqtt_client:
-        mqtt_client.disconnect()
+    if mqtt:
+        mqtt.disconnect()
+
+if __name__ == '__main__':
+    main()
