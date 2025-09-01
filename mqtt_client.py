@@ -6,11 +6,12 @@ import config
 
 
 class MqttOneM2MClient:
-    def __init__(self, broker, port, origin, cse):
+    def __init__(self, broker, port, origin, cse_csi, cse_rn="TinyIoT"):
         self.broker = broker
         self.port = int(port)
         self.origin = origin
-        self.cse = cse
+        self.cse_csi = cse_csi
+        self.cse_rn = cse_rn
 
         self.response_received = threading.Event()
         self.last_response = None
@@ -22,8 +23,8 @@ class MqttOneM2MClient:
         self.client.on_message = self.on_message
         self.client.on_disconnect = self.on_disconnect
 
-        self.req_topic = f"/oneM2M/req/{self.origin}/{self.cse}/json"
-        self.resp_topic = f"/oneM2M/resp/{self.origin}/{self.cse}/json"
+        self.req_topic = f"/oneM2M/req/{self.origin}/{self.cse_csi}/json"
+        self.resp_topic = f"/oneM2M/resp/{self.origin}/{self.cse_csi}/json"
 
     def on_connect(self, client, userdata, flags, rc):
         print("[MQTT] Connection successful." if rc == 0 else f"[MQTT] Connection failed: rc={rc}")
@@ -60,7 +61,7 @@ class MqttOneM2MClient:
             self.client.disconnect()
         print("[MQTT] Disconnected.")
 
-    def _send_request(self, body):
+    def _send_request(self, body, ok_rsc=(2000, 2001, 2004)):
         request_id = str(uuid.uuid4())
         message = {
             "fr": self.origin,
@@ -72,7 +73,7 @@ class MqttOneM2MClient:
             "rvi": "3"
         }
 
-        req_topic_with_origin = f"/oneM2M/req/{self.origin}/{self.cse}/json"
+        req_topic_with_origin = f"/oneM2M/req/{self.origin}/{self.cse_csi}/json"
 
         print(f"[MQTT] [SEND] Topic: {req_topic_with_origin}")
         print(f"[MQTT] [SEND] Payload:")
@@ -82,30 +83,47 @@ class MqttOneM2MClient:
         self.client.publish(req_topic_with_origin, json.dumps(message))
 
         if self.response_received.wait(timeout=5):
-            return True
+            try:
+                rsc = int(self.last_response.get("rsc", 0))
+            except Exception:
+                rsc = 0
+            return rsc in ok_rsc
         print("[ERROR] No MQTT response received within timeout.")
         return False
 
     def create_ae(self, ae_name):
-        return self._send_request({
-            "to": f"/{self.cse}",
+        ok = self._send_request({
+            "to": f"{self.cse_rn}",
             "op": 1,
             "ty": 2,
             "pc": {"m2m:ae": {"rn": ae_name, "api": "N.device", "rr": True}}
-        })
+        }, ok_rsc=(2001, 4105))
+        if not ok and self.last_response:
+            print(f"[ERROR] AE create failed rsc={self.last_response.get('rsc')} msg={self.last_response}")
+        elif ok and self.last_response and str(self.last_response.get("rsc")) == "4105":
+            print("[MQTT] AE already exists. Proceeding.")
+        return ok
 
     def create_cnt(self, ae_name, cnt_name):
-        return self._send_request({
-            "to": f"/{self.cse}/{ae_name}",
+        ok = self._send_request({
+            "to": f"{self.cse_rn}/{ae_name}",
             "op": 1,
             "ty": 3,
             "pc": {"m2m:cnt": {"rn": cnt_name}}
-        })
+        }, ok_rsc=(2001, 4105))
+        if not ok and self.last_response:
+            print(f"[ERROR] CNT create failed rsc={self.last_response.get('rsc')} msg={self.last_response}")
+        elif ok and self.last_response and str(self.last_response.get("rsc")) == "4105":
+            print("[MQTT] CNT already exists. Proceeding.")
+        return ok
 
     def send_cin(self, ae_name, cnt_name, value):
-        return self._send_request({
-            "to": f"/{self.cse}/{ae_name}/{cnt_name}",
+        ok = self._send_request({
+            "to": f"{self.cse_rn}/{ae_name}/{cnt_name}",
             "op": 1,
             "ty": 4,
             "pc": {"m2m:cin": {"con": value}}
-        })
+        }, ok_rsc=(2001,))
+        if not ok and self.last_response:
+            print(f"[ERROR] CIN send failed rsc={self.last_response.get('rsc')} msg={self.last_response}")
+        return ok
