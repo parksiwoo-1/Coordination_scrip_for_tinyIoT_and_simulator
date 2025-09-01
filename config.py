@@ -2,7 +2,8 @@
 SERVER_EXEC = "/home/parks/tinyIoT/source/server/server"
 
 # oneM2M CSE
-CSE_NAME = "tinyiot"
+CSE_NAME = "tinyiot"   # csi (use topic)
+CSE_RN   = "TinyIoT"   # rn  (use MQTT payload "to")
 
 # HTTP (REST)
 HTTP_HOST = "127.0.0.1"
@@ -31,12 +32,12 @@ TEMP_PROFILE = {
     "data_type": "float",   # int | float | string
     "min": 20.0,
     "max": 35.0,
-    "length": 8,            # string일 때만 사용
+    "length": 5,            # only string
 }
 
 HUMID_PROFILE = {
-    "data_type": "int",     # int | float | string
+    "data_type": "float",     # int | float | string
     "min": 50,
     "max": 90,
-    "length": 8,
+    "length": 5,
 }
