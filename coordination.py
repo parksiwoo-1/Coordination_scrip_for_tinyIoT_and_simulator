@@ -42,12 +42,12 @@ if __name__ == '__main__':
         except Exception: pass
         sys.exit(1)
 
-    PROTOCOL_1     = 'http'     # http OR mqtt
+    PROTOCOL_1     = 'mqtt'     # http OR mqtt
     MODE_1         = 'random'   # csv OR random
     FREQUENCY_1    = 2          # seconds
     REGISTRATION_1 = 1          # 0 OR 1
 
-    PROTOCOL_2     = 'http'     # http OR mqtt
+    PROTOCOL_2     = 'mqtt'     # http OR mqtt
     MODE_2         = 'random'   # csv OR random
     FREQUENCY_2    = 2          # seconds
     REGISTRATION_2 = 1          # 0 OR 1
