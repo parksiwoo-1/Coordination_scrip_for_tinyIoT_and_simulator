@@ -7,7 +7,7 @@ CSE_RN   = "TinyIoT"   # rn  (use MQTT payload "to")
 
 # HTTP (REST)
 HTTP_HOST = "127.0.0.1"
-HTTP_PORT = 3000  # int 권장
+HTTP_PORT = 3000  
 HTTP_BASE = f"http://{HTTP_HOST}:{HTTP_PORT}"
 CSE_URL = f"{HTTP_BASE}/{CSE_NAME}"
 
@@ -29,15 +29,13 @@ HUMID_CSV = "test data/test_data_humid.csv"
 
 # ---------- Device Profiles (used in random mode) ----------
 TEMP_PROFILE = {
-    "data_type": "float",   # int | float | string
+    "data_type": "float",   # int | float
     "min": 20.0,
     "max": 35.0,
-    "length": 5,            # only string
 }
 
 HUMID_PROFILE = {
-    "data_type": "float",     # int | float | string
+    "data_type": "float",     # int | float
     "min": 50,
     "max": 90,
-    "length": 5,
 }
