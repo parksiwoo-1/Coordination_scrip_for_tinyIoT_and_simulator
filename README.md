@@ -93,8 +93,12 @@ https://github.com/seslabSJU/tinyIoT
 
 tinyIoT config.h 설정
 1.
+
+
 <img width="684" height="241" alt="image" src="https://github.com/user-attachments/assets/705a3ac5-4dec-4bbc-b35a-976ae12d600b" />
 2. #define ENABLE_MQTT의 주석을 제거해야 한다.
+
+
 <img width="641" height="397" alt="image" src="https://github.com/user-attachments/assets/6b856bbc-0dc7-46b9-bcd9-9a606407592f" />
 
 
