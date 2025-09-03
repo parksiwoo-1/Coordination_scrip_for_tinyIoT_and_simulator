@@ -85,6 +85,17 @@ sudo systemctl start mosquitto
 ```
 
 
+```c
+sudo systemctl status mosquitto
+```
+
+
+<img width="2162" height="632" alt="image" src="https://github.com/user-attachments/assets/bad124a0-6891-43fe-8ed4-8a9bef79c4ea" />
+
+
+나오면 broker 설정은 완료되었다.
+
+
 ### 3. tinyIoT
 
 https://github.com/seslabSJU/tinyIoT
