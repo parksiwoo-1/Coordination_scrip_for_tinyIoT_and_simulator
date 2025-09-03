@@ -1,9 +1,7 @@
 import json
-import uuid
 import threading
+import uuid
 import paho.mqtt.client as mqtt
-import config
-
 
 class MqttOneM2MClient:
     def __init__(self, broker, port, origin, cse_csi, cse_rn="TinyIoT"):
