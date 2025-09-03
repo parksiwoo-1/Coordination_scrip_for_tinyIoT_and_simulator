@@ -136,7 +136,7 @@ git clone https://github.com/parksiwoo-1/Coordination_script_and_Device_simulato
 ### 1. 클론 한 경로로 진입
 
 ```c
-cd tinyIoT/script
+cd tinyIoT/script (예시)
 ```
 본인이 설정한 경로에 맞게 입력
 
