@@ -1,6 +1,13 @@
-import argparse, csv, time, requests, socket, sys, random, string
-from mqtt_client import MqttOneM2MClient
+import argparse
 import config
+import csv
+import random
+import requests
+import socket
+import string
+import sys
+import time
+from mqtt_client import MqttOneM2MClient
 
 # ---- Timeouts/Jitter (fallback if not in config) ----
 CONNECT_TIMEOUT = getattr(config, 'CONNECT_TIMEOUT', 2)
@@ -136,16 +143,16 @@ def send_cin_http(ae, cnt, value):
 # ---------- Main ----------
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument('--Frequency', type=int, required=True)
-    p.add_argument('--Registration', type=int, default=0)
-    p.add_argument('--Mode', choices=['csv', 'random'], default='csv')
-    p.add_argument('--Protocol', choices=['http', 'mqtt'], default='http')
+    p.add_argument('--protocol', choices=['http', 'mqtt'], default='http')
+    p.add_argument('--mode', choices=['csv', 'random'], default='csv')
+    p.add_argument('--frequency', type=int, required=True)
+    p.add_argument('--registration', type=int, default=0)
     args = p.parse_args()
 
     AE, CNT = "ChumidSensor", "humidity"
     mqtt = None
 
-    if args.Protocol == 'http':
+    if args.protocol == 'http':
         print("[CHECK] Validating HTTP server/port from config...")
         if not check_http_reachable():
             print(f"[ERROR] Cannot connect to HTTP server: {config.HTTP_HOST}:{config.HTTP_PORT}")
@@ -160,9 +167,9 @@ def main():
         if not mqtt.connect():
             sys.exit(1)
 
-    if args.Registration == 1:
+    if args.registration == 1:
         print("[HUMID] Registering AE and CNT...")
-        if args.Protocol == 'http':
+        if args.protocol == 'http':
             if not check_and_create_ae(AE):
                 print("[ERROR] AE creation failed.")
                 sys.exit(1)
@@ -176,7 +183,7 @@ def main():
             if not mqtt.create_cnt(AE, CNT): sys.exit(1)
 
     data = []
-    if args.Mode == 'csv':
+    if args.mode == 'csv':
         path = config.HUMID_CSV
         try:
             with open(path, 'r') as f:
@@ -194,12 +201,12 @@ def main():
     error_count = 0
 
     while True:
-        value = data[index] if args.Mode == 'csv' else generate_random_value_from_profile(config.HUMID_PROFILE)
-        ok = send_cin_http(AE, CNT, value) if args.Protocol=='http' else mqtt.send_cin(AE, CNT, value)
+        value = data[index] if args.mode == 'csv' else generate_random_value_from_profile(config.HUMID_PROFILE)
+        ok = send_cin_http(AE, CNT, value) if args.protocol=='http' else mqtt.send_cin(AE, CNT, value)
 
         if ok:
             print(f"[HUMID] Successfully sent: {value}")
-            if args.Mode == 'csv':
+            if args.mode == 'csv':
                 index += 1
             error_count = 0
         else:
@@ -210,11 +217,11 @@ def main():
                 print("[ERROR] Repeated failures detected. Exiting.")
                 break
 
-        if args.Mode == 'csv' and index >= len(data):
+        if args.mode == 'csv' and index >= len(data):
             print("[INFO] All data has been sent. Exiting.")
             break
 
-        time.sleep(args.Frequency + random.uniform(0, JITTER_MAX))
+        time.sleep(args.frequency + random.uniform(0, JITTER_MAX))
 
     if mqtt:
         mqtt.disconnect()
