@@ -42,7 +42,13 @@
 
 ## 환경 설치
 
-### 1. Python
+
+### 1. Ubuntu
+
+- Ubuntu 24.04.2 LTS
+  
+
+### 2. Python
 
 - Python 3.8+
 - 필요 라이브러리 설치:
@@ -52,7 +58,29 @@ pip install paho-mqtt requests
 ```
 
 
-### 2. MQTT 브로커
+### 3. tinyIoT
+
+https://github.com/seslabSJU/tinyIoT
+
+이것을 참조하여 tinyIoT에 대한 이해와 설치를 하면 된다.
+
+tinyIoT config.h 설정
+1.
+
+
+<img width="684" height="241" alt="image" src="https://github.com/user-attachments/assets/705a3ac5-4dec-4bbc-b35a-976ae12d600b" />
+
+
+
+2. #define ENABLE_MQTT의 주석을 제거해야 한다.
+
+
+
+<img width="641" height="397" alt="image" src="https://github.com/user-attachments/assets/6b856bbc-0dc7-46b9-bcd9-9a606407592f" />
+
+
+
+### 4. MQTT 브로커 (mosquitto)
 
 - Mosquitto 설치 필요:
 
@@ -78,7 +106,7 @@ mosquitto-2.0.22-install-windows-x64.exe
 
 
 
-- 실행:
+- 실행: Windows PowerShell에서 wsl로 실행
 
 ```c
 sudo systemctl start mosquitto
@@ -93,32 +121,11 @@ sudo systemctl status mosquitto
 <img width="2162" height="632" alt="image" src="https://github.com/user-attachments/assets/bad124a0-6891-43fe-8ed4-8a9bef79c4ea" />
 
 
-나오면 broker 설정은 완료되었다.
-
-
-### 3. tinyIoT
-
-https://github.com/seslabSJU/tinyIoT
-
-이것을 참조하여 tinyIoT에 대한 이해와 설치를 하면 된다.
-
-tinyIoT config.h 설정
-1.
-
-
-<img width="684" height="241" alt="image" src="https://github.com/user-attachments/assets/705a3ac5-4dec-4bbc-b35a-976ae12d600b" />
+이미지와 같이 "active (running)" 나오면 broker 설정은 완료되었다.
 
 
 
-2. #define ENABLE_MQTT의 주석을 제거해야 한다.
-
-
-
-<img width="641" height="397" alt="image" src="https://github.com/user-attachments/assets/6b856bbc-0dc7-46b9-bcd9-9a606407592f" />
-
-
-
-### 4. coordination 스크립트 &  디바이스 시뮬레이터
+### 5. coordination 스크립트 &  디바이스 시뮬레이터
 
 - 레파지토리 클론
 
