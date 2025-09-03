@@ -55,10 +55,10 @@ if __name__ == '__main__':
     print("[COORD] Starting simulator_temp...")
     device1 = subprocess.Popen([
         'python3', 'simulator_temp.py',
-        '--Protocol', PROTOCOL_1,
-        '--Mode', MODE_1,
-        '--Frequency', str(FREQUENCY_1),
-        '--Registration', str(REGISTRATION_1),
+        '--protocol', PROTOCOL_1,
+        '--mode', MODE_1,
+        '--frequency', str(FREQUENCY_1),
+        '--registration', str(REGISTRATION_1),
     ])
 
     if not wait_for_process("simulator_temp.py"):
@@ -72,10 +72,10 @@ if __name__ == '__main__':
     print("[COORD] Starting simulator_humid...")
     device2 = subprocess.Popen([
         'python3', 'simulator_humid.py',
-        '--Protocol', PROTOCOL_2,
-        '--Mode', MODE_2,
-        '--Frequency', str(FREQUENCY_2),
-        '--Registration', str(REGISTRATION_2),
+        '--protocol', PROTOCOL_2,
+        '--mode', MODE_2,
+        '--frequency', str(FREQUENCY_2),
+        '--registration', str(REGISTRATION_2),
     ])
 
     if not wait_for_process("simulator_humid.py"):
