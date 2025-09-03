@@ -57,7 +57,7 @@ pip install paho-mqtt requests
 - Mosquitto 설치 필요:
 
 ```c
-sudo apt install mosquitto mosquitto-clients
+[sudo apt install mosquitto mosquitto-clients](https://mosquitto.org/)
 ```
 
 - 설정:
