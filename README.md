@@ -102,7 +102,8 @@ mosquitto-2.0.22-install-windows-x64.exe
 #listener 1883
 #protocol mqtt
 을 추가하면 된다.
-<img width="1410" height="201" alt="image" src="https://github.com/user-attachments/assets/968f54c1-b837-424f-a6ab-039b1c8e8598" />
+<img width="2043" height="282" alt="image" src="https://github.com/user-attachments/assets/6c97477f-eb28-4d64-b71a-f249ff1336cb" />
+
 
 
 
