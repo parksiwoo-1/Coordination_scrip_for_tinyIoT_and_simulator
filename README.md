@@ -42,14 +42,15 @@ pip install paho-mqtt
 ```
 
 ### tinyIoT Setup
+-Access the tinyIoT GitHub repository
 ```bash
 [Clone and build tinyIoT](https://github.com/seslabSJU/tinyIoT) according to its README.
 ```
--Access the tinyIoT GitHub repository
 
 
 
-tinyIoT config.h settings
+
+-tinyIoT config.h settings
 1. Verify that the following settings are correctly configured:
 
 
