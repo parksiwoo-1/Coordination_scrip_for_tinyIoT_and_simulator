@@ -105,4 +105,4 @@ python3 coordination.py
 
 - frequency : Data transmission interval (seconds)
 
--registration : 0 or 1 (Enable AE/CNT auto-registration)
+- registration : 0 or 1 (Enable AE/CNT auto-registration)
