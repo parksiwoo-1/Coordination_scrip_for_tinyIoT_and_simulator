@@ -69,9 +69,10 @@ Install from mosquitto.org
 ```
 
 Edit mosquitto.conf:
+-add #listener 1883, #protocol mqtt
 
-listener 1883
-protocol mqtt
+
+<img width="2043" height="282" alt="image" src="https://github.com/user-attachments/assets/6c97477f-eb28-4d64-b71a-f249ff1336cb" />
 
 
 Start the broker:
