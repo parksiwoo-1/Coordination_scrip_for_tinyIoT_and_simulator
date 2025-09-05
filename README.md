@@ -43,13 +43,18 @@ pip install paho-mqtt
 
 ### tinyIoT Setup
 ```bash
-[Clone and build tinyIoT](https://github.com/seslabSJU/tinyIoT)
+[Clone and build tinyIoT](https://github.com/seslabSJU/tinyIoT) according to its README.
 ```
 -Access the tinyIoT GitHub repository
 
-In config.h, uncomment:
 
-#define ENABLE_MQTT
+tinyIoT config.h settings
+1.
+<img width="684" height="241" alt="image" src="https://github.com/user-attachments/assets/705a3ac5-4dec-4bbc-b35a-976ae12d600b" />
+
+Uncomment #define ENABLE_MQTT.
+
+<img width="641" height="397" alt="image" src="https://github.com/user-attachments/assets/6b856bbc-0dc7-46b9-bcd9-9a606407592f" />
 
 ### Mosquitto Setup
 ```bash
