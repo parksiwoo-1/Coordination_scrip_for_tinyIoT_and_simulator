@@ -33,16 +33,19 @@ The simulators follow the **oneM2M standard** and support both **HTTP** and **MQ
 
 ## Installation
 
-### Python Dependencies
+### Python Libraries
 ```bash
 pip install requests
+```
+```bash
 pip install paho-mqtt
 ```
 
 ### tinyIoT Setup
 ```bash
-Clone and build tinyIoT
+[Clone and build tinyIoT](https://github.com/seslabSJU/tinyIoT)
 ```
+-Access the tinyIoT GitHub repository
 
 In config.h, uncomment:
 
