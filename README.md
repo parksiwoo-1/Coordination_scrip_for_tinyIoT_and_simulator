@@ -35,8 +35,8 @@
 ## 사용 환경
 
 - **언어**: Python 3
-- **MQTT broker**: mosquitto
 - **IoT**: tinyIoT
+- **MQTT broker**: mosquitto
 
 
 
