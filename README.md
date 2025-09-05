@@ -53,8 +53,11 @@
 - Python 3.8+
 - 필요 라이브러리 설치:
 
-```c
-pip install paho-mqtt requests
+```
+pip install requests
+```
+```
+pip install paho-mqtt
 ```
 
 
