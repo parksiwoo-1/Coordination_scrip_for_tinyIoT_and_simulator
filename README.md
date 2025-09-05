@@ -42,7 +42,7 @@ pip install paho-mqtt
 ```
 
 ### tinyIoT Setup
--Access the tinyIoT GitHub repository
+- Access the tinyIoT GitHub repository
 ```bash
 [Clone and build tinyIoT](https://github.com/seslabSJU/tinyIoT) according to its README.
 ```
@@ -50,7 +50,7 @@ pip install paho-mqtt
 
 
 
--tinyIoT config.h settings
+- tinyIoT config.h settings
 1. Verify that the following settings are correctly configured:
 
 
@@ -70,7 +70,7 @@ Install from mosquitto.org
 
 Edit mosquitto.conf:
 
--add #listener 1883, #protocol mqtt
+- add #listener 1883, #protocol mqtt
 
 
 <img width="2043" height="282" alt="image" src="https://github.com/user-attachments/assets/6c97477f-eb28-4d64-b71a-f249ff1336cb" />
@@ -99,10 +99,10 @@ python3 coordination.py
 
 ## Options
 
--Protocol : HTTP or MQTT
+- protocol : HTTP or MQTT
 
--Mode : csv or random
+- mode : csv or random
 
--FREQUENCY : Data transmission interval (seconds)
+- frequency : Data transmission interval (seconds)
 
--Registration 1 : Enable AE/CNT auto-registration
+-registration : 0 or 1 (Enable AE/CNT auto-registration)
