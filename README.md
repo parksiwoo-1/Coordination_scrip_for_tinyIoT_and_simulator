@@ -101,6 +101,12 @@ sudo systemctl status mosquitto
 ```
 
 
+<img width="2162" height="632" alt="image" src="https://github.com/user-attachments/assets/bad124a0-6891-43fe-8ed4-8a9bef79c4ea" />
+
+
+If it shows "active (running)" as in the image above, the broker setup is complete.
+
+
 ## Run
 ### Clone Repository
 ```bash
