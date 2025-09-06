@@ -71,7 +71,12 @@ pip install paho-mqtt
 
 2. Click **Download** in website
 
-3. For Windows, download the x64 installer: mosquitto-2.0.22-install-windows-x64.exe
+3. For Windows, download the x64 installer:
+
+
+```bash   
+mosquitto-2.0.22-install-windows-x64.exe
+```
 
 
 4. Edit mosquitto.conf:
