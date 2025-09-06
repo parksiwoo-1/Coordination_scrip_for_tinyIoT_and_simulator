@@ -13,7 +13,7 @@ CSE_URL = f"{HTTP_BASE}/{CSE_NAME}"
 
 # MQTT (Mosquitto) 
 MQTT_HOST = "127.0.0.1"
-MQTT_PORT = 1883  # int
+MQTT_PORT = 1883  
 
 # Time & Retry
 WAIT_SERVER_TIMEOUT   = 30  # seconds
@@ -39,4 +39,5 @@ HUMID_PROFILE = {
     "min": 50,
     "max": 90,
 }
+
 
