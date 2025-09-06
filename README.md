@@ -128,15 +128,9 @@ git clone https://github.com/parksiwoo-1/Coordination_script_and_Device_simulato
 cd tinyIoT/script   # example path
 ```
 
-
-4. Run Coordination Script & Simulator
-
-```bash
-python3 coordination.py
-```
-
-## Options
-
+4. Set the options in `coordination.py`.  
+More detailed option settings can be configured in `config.py`.
+For more detailed descriptions of the options, refer to the man page.
 - protocol : HTTP or MQTT
 
 - mode : csv or random
@@ -144,3 +138,12 @@ python3 coordination.py
 - frequency : Data transmission interval (seconds)
 
 - registration : 0 or 1 (Enable AE/CNT auto-registration)
+
+
+
+
+6. Run Coordination Script & Simulator
+
+```bash
+python3 coordination.py
+```
