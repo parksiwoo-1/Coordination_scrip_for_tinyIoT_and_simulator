@@ -28,7 +28,9 @@ The simulators follow the **oneM2M standard** and support both **HTTP** and **MQ
 ## Environment
 - **OS**: Ubuntu 24.04.2 LTS  
 - **Language**: Python 3.8+  
-- **IoT**: [tinyIoT](https://github.com/seslabSJU/tinyIoT)  
+- **IoT**: [tinyIoT](https://github.com/seslabSJU/tinyIoT)
+  <img width="584" height="208" alt="image" src="https://github.com/user-attachments/assets/4ae1149b-fd7f-43a2-bb53-f2e742399279" />
+
 - **MQTT Broker**: [Mosquitto](https://mosquitto.org)  
 
 ## Installation
