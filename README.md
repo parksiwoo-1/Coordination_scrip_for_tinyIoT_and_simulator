@@ -151,5 +151,3 @@ For more detailed descriptions of the options, refer to the man page.
 python3 coordination.py
 ```
 
-
-## Man page
