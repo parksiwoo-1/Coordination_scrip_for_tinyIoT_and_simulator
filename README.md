@@ -225,7 +225,6 @@ April 06, 2025                                                                  
 
 
 
-
 SIMULATOR_TEMP.PY(1)                        IoT Sensor Simulator Manual                        SIMULATOR_TEMP.PY(1)
 
 NAME
@@ -364,7 +363,7 @@ April 06, 2025                                                                  
 
 
 
-MQTT_CLIENT.PY(1)                           IoT MQTT Module Manual                           MQTT_CLIENT.PY(1)
+MQTT_CLIENT.PY(3)                           IoT MQTT Module Manual                           MQTT_CLIENT.PY(3)
 
 NAME
        mqtt_client.py - client module for performing MQTT communication based on oneM2M structure
@@ -433,7 +432,7 @@ AUTHOR
 COPYRIGHT
        This module is freely usable for research and development of MQTT-based IoT communication.
 
-April 06, 2025                                                                              MQTT_CLIENT.PY(1)
+April 06, 2025                                                                              MQTT_CLIENT.PY(3)
 
 
 
