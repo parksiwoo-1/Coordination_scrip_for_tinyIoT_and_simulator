@@ -63,12 +63,18 @@ pip install paho-mqtt
 <img width="641" height="397" alt="image" src="https://github.com/user-attachments/assets/6b856bbc-0dc7-46b9-bcd9-9a606407592f" />
 
 
-### Mosquitto Setup
-```bash
-Install from mosquitto.org
-```
+### MQTT Broker (Mosquitto) Setup
+- **Mosquitto installation required**
 
-Edit mosquitto.conf:
+1. Visit the website  
+   [https://mosquitto.org](https://mosquitto.org)  
+
+2. Click **Download**  
+
+3. For Windows, download the x64 installer: mosquitto-2.0.22-install-windows-x64.exe
+
+
+4. Edit mosquitto.conf:
 
 - add #listener 1883, #protocol mqtt
 
@@ -76,13 +82,19 @@ Edit mosquitto.conf:
 <img width="2043" height="282" alt="image" src="https://github.com/user-attachments/assets/6c97477f-eb28-4d64-b71a-f249ff1336cb" />
 
 
-Start the broker:
+5 Run  
+Execute in Windows PowerShell using WSL:  
+
+
 ```bash
 sudo systemctl start mosquitto
 ```
+
+
 ```bash
 sudo systemctl status mosquitto
 ```
+
 
 ## Run
 ### Clone Repository
