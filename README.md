@@ -107,15 +107,30 @@ sudo systemctl status mosquitto
 If it shows "active (running)" as in the image above, the broker setup is complete.
 
 
-## Run
+## Run Coordination Script & Device Simulators
 ### Clone Repository
+1. Navigate to the directory where you want to clone in Ubuntu:
+
+```bash
+cd tinyIoT/script   #example path
+```
+
+
+2. Clone
+
 ```bash
 git clone https://github.com/parksiwoo-1/Coordination_script_and_Device_simulators_for_tinyIoT
 ```
+
+3. Enter the cloned directory
+
 ```bash
 cd tinyIoT/script   # example path
 ```
-- Coordination Script
+
+
+4. Run Coordination Script & Simulator
+
 ```bash
 python3 coordination.py
 ```
