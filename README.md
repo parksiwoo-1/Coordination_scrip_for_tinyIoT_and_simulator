@@ -153,65 +153,63 @@ python3 coordination.py
 
 
 ## Man page
-### coordination
-
-COORDINATION.PY(1)                            IoT Device Coordination Manual                           COORDINATION.PY(1)
+```bash
+COORDINATION.PY(1)                       IoT Device Coordination Manual                        COORDINATION.PY(1)
 
 NAME
-       coordination.py - coordination script for controlling and executing tinyIoT server and device simulators
+       coordination.py - control and execution script coordinating tinyIoT server and device simulators
 
 SYNOPSIS
        python3 coordination.py
 
 DESCRIPTION
-       The coordination.py script runs the tinyIoT server and sequentially executes the temperature simulator
-       (simulator_temp.py) and humidity simulator (simulator_humid.py) to control the overall IoT simulation environment.
-       It checks the server response, detects whether each simulator is running normally, and safely terminates
-       all processes if a failure occurs.
+       coordination.py runs the tinyIoT server and sequentially launches the temperature simulator
+       (simulator_temp.py) and humidity simulator (simulator_humid.py) to control the overall IoT simulation
+       environment. It checks the server's responsiveness, detects whether each simulator is running properly, and
+       safely terminates all processes in case of failure.
 
 FUNCTIONALITY
        - Start the tinyIoT server and wait for its response.
-       - Verify server responsiveness; terminate if the check fails.
-       - Execute the temperature and humidity simulators with the specified parameters (protocol, mode, frequency, registration).
-       - Verify that each simulator is running correctly.
-       - Perform graceful shutdown upon receiving a KeyboardInterrupt during execution.
+       - Check if the server response is valid, terminate on failure.
+       - Launch the temperature and humidity simulators with specified settings (protocol, mode, frequency, registration).
+       - Confirm that each simulator is running properly.
+       - Perform graceful shutdown on KeyboardInterrupt input during execution.
 
 OPTIONS
-       coordination.py itself does not have command-line options. Parameters for the simulators it runs are hardcoded.
-       The following options are passed to each simulator:
+       coordination.py does not take its own options; simulator parameters are hardcoded and passed internally:
 
        --protocol
-              Specifies the data transmission protocol (http or mqtt).
+              Specify the data transfer protocol (http or mqtt).
 
        --mode
-              Specifies the type of data to transmit (csv or random).
+              Select the type of data to send (csv or random).
 
        --frequency
-              Sets the data transmission interval in seconds.
+              Set the data transfer interval in seconds.
 
        --registration
-              Determines whether to create AE and CNT resources (1 = create, 0 = do not create).
+              Specify whether to create AE and CNT resources (1 = create, 0 = skip).
 
 FILES
        tinyIoT
-              The lightweight oneM2M-based IoT server executed by coordination.py.
+              OneM2M-based lightweight IoT server executed by coordination.py.
 
        simulator_temp.py
               Simulator script acting as a temperature sensor.
 
        simulator_humid.py
               Simulator script acting as a humidity sensor.
-      
+
        mqtt_client.py
-              Module responsible for MQTT-based oneM2M message transmission in simulators.
+              Module handling MQTT-based oneM2M message transmission for simulators.
 
        config.py
-              Configuration file containing server execution path, wait times, timeouts, and other settings used by coordination.py.
+              Configuration file containing server path, wait times, timeouts, and other parameters.
 
 EXIT STATUS
        0      All processes executed successfully.
 
-       1      Terminated due to server response failure, simulator execution failure, or an exception.
+       1      Terminated due to server response failure, simulator startup failure, or exception.
 
 SEE ALSO
        simulator_temp.py(1), simulator_humid.py(1), config.py(5)
@@ -220,69 +218,66 @@ AUTHOR
        Author: Siwoo Park <parksw@sju.ac.kr>
 
 COPYRIGHT
-       This script does not follow a specific license and may be freely used in local environments for learning or testing purposes.
+       This script does not follow a specific license and is freely usable in local environments for learning or
+       testing purposes.
 
-September 6, 2025                                                                                      COORDINATION.PY(1)
+April 06, 2025                                                                              COORDINATION.PY(1)
 
-
-
-### simulator_temp
-
-SIMULATOR_TEMP.PY(1)                         IoT Sensor Simulator Manual                          SIMULATOR_TEMP.PY(1)
+SIMULATOR_TEMP.PY(1)                        IoT Sensor Simulator Manual                        SIMULATOR_TEMP.PY(1)
 
 NAME
-       simulator_temp.py - device simulator that emulates a temperature sensor and transmits data to tinyIoT using oneM2M
+       simulator_temp.py - device simulator that emulates a temperature sensor and sends data to tinyIoT via oneM2M
 
 SYNOPSIS
        python3 simulator_temp.py --protocol {http|mqtt} --mode {csv|random} --frequency N (seconds) --registration [0|1]
 
 DESCRIPTION
-       simulator_temp.py is a device simulator that emulates a temperature sensor, generating sensor data at a specified
-       interval and transmitting it as a oneM2M-compliant ContentInstance message. Both HTTP and MQTT protocols are
-       supported, and the transmitted data can be selected either from a CSV file or generated randomly.
+       simulator_temp.py simulates a temperature sensor by generating sensor data at specified intervals and sending
+       it as oneM2M-compliant ContentInstance messages. Both HTTP and MQTT protocols are supported, with data
+       transmitted either from a CSV file or generated randomly.
 
-       Additionally, AE (Application Entity) and CNT (Container) resources can be pre-registered on the server if required.
+       AE (Application Entity) and CNT (Container) resources can optionally be registered on the server.
 
 OPTIONS
        --protocol {http|mqtt}
-              Selects the data transmission protocol. http uses the REST API method, while mqtt transmits via an MQTT broker.
+              Selects the transfer protocol. http uses REST API, mqtt sends data via MQTT broker.
 
        --mode {csv|random}
-              Determines how the data to be transmitted is selected. csv reads from a predefined CSV file and transmits
-              sequentially, while random generates data according to the configured profile.
+              Determines the data source. csv reads from a prepared CSV file, random generates values based on
+              predefined profiles.
 
        --frequency N
-              Specifies the interval, in seconds, at which sensor data is transmitted.
+              Specifies the interval in seconds between transmissions.
 
        --registration 0|1
-              Sets whether AE and CNT resources should be registered on the server. 1 performs registration, 0 transmits without registration.
+              Controls whether AE and CNT resources are created on the server (1 = create, 0 = skip).
 
 FUNCTIONALITY
-       - Checks HTTP connectivity in advance.
-       - When using MQTT protocol, connects to and disconnects from the broker.
-       - If the registration option is set to 1, checks for AE and CNT on the server and creates them if they do not exist.
-       - In CSV mode, reads and transmits data sequentially from the file; in random mode, generates data based on profile settings.
-       - For HTTP transmission, verifies POST success and uses `/la` request as an additional confirmation if needed.
-       - Retries upon errors, and terminates if repeated failures exceed the threshold.
+       - Validates HTTP connectivity if protocol is http.
+       - For MQTT, handles broker connection and disconnection.
+       - Registers AE and CNT resources if registration is set to 1.
+       - Sends sequential CSV data or random values depending on mode.
+       - For HTTP, checks POST result and verifies storage via `/la` when necessary.
+       - Retries on errors; terminates after repeated failures.
 
 FILES
        config.py
-              Configuration file defining key parameters such as server settings, transmission interval, file paths, and error thresholds.
+              Defines parameters such as server settings, transmission frequency, file paths, and error thresholds.
 
        mqtt_client.py
-              Module implementing a oneM2M-based client for MQTT transmission.
+              Implements oneM2M-compliant MQTT client for message transmission.
 
        TEMP_CSV (config.TEMP_CSV)
-              Path to the sensor data file used in CSV mode.
+              Path to the CSV file used in csv mode.
 
 ENVIRONMENT VARIABLES
-       All configurations are defined in config.py; environment variables are not used.
+       No environment variables are used; all settings are defined in config.py.
 
 EXIT STATUS
-       0      Normal termination.
+       0      Successful completion.
 
-       1      Termination due to configuration file errors, server connection failure, data file loading failure,
-              AE/CNT registration failure, or repeated transmission errors.
+       1      Exited due to configuration errors, server connection failure, data file errors, AE/CNT registration
+              failure, or repeated transmission failures.
 
 SEE ALSO
        mqtt_client.py(1), config.py(5), simulator_humid.py(1)
@@ -291,68 +286,65 @@ AUTHOR
        Author: Siwoo Park <parksw@sju.ac.kr>
 
 COPYRIGHT
-       This script does not follow an open license and may be freely used in local environments for testing and research purposes.
+       Freely usable in local environments for testing and research without any specific license.
 
-September 6, 2025                                                                                  SIMULATOR_TEMP.PY(1)
+April 06, 2025                                                                           SIMULATOR_TEMP.PY(1)
 
-
-### simulator_humid
-
-SIMULATOR_HUMID.PY(1)                         IoT Sensor Simulator Manual                          SIMULATOR_HUMID.PY(1)
+SIMULATOR_HUMID.PY(1)                       IoT Sensor Simulator Manual                        SIMULATOR_HUMID.PY(1)
 
 NAME
-       simulator_humid.py - device simulator that emulates a humidity sensor and transmits data to tinyIoT using oneM2M
+       simulator_humid.py - device simulator that emulates a humidity sensor and sends data to tinyIoT via oneM2M
 
 SYNOPSIS
        python3 simulator_humid.py --protocol {http|mqtt} --mode {csv|random} --frequency N (seconds) --registration [0|1]
 
 DESCRIPTION
-       simulator_humid.py is a device simulator that emulates a humidity sensor, generating sensor data at a specified
-       interval and transmitting it as a oneM2M-compliant ContentInstance message. Both HTTP and MQTT protocols are
-       supported, and the transmitted data can be selected either from a CSV file or generated randomly.
+       simulator_humid.py simulates a humidity sensor by generating sensor data at specified intervals and sending
+       it as oneM2M-compliant ContentInstance messages. Both HTTP and MQTT protocols are supported, with data
+       transmitted either from a CSV file or generated randomly.
 
-       Additionally, AE (Application Entity) and CNT (Container) resources can be pre-registered on the server if required.
+       AE (Application Entity) and CNT (Container) resources can optionally be registered on the server.
 
 OPTIONS
        --protocol {http|mqtt}
-              Selects the data transmission protocol. http uses the REST API method, while mqtt transmits via an MQTT broker.
+              Selects the transfer protocol. http uses REST API, mqtt sends data via MQTT broker.
 
        --mode {csv|random}
-              Determines how the data to be transmitted is selected. csv reads from a predefined CSV file and transmits
-              sequentially, while random generates data according to the configured profile.
+              Determines the data source. csv reads from a prepared CSV file, random generates values based on
+              predefined profiles.
 
        --frequency N
-              Specifies the interval, in seconds, at which sensor data is transmitted.
+              Specifies the interval in seconds between transmissions.
 
        --registration 0|1
-              Sets whether AE and CNT resources should be registered on the server. 1 performs registration, 0 transmits without registration.
+              Controls whether AE and CNT resources are created on the server (1 = create, 0 = skip).
 
 FUNCTIONALITY
-       - Checks HTTP connectivity in advance.
-       - When using MQTT protocol, connects to and disconnects from the broker.
-       - If the registration option is set to 1, checks for AE and CNT on the server and creates them if they do not exist.
-       - In CSV mode, reads and transmits data sequentially from the file; in random mode, generates data based on profile settings.
-       - For HTTP transmission, verifies POST success and uses `/la` request as an additional confirmation if needed.
-       - Retries upon errors, and terminates if repeated failures exceed the threshold.
+       - Validates HTTP connectivity if protocol is http.
+       - For MQTT, handles broker connection and disconnection.
+       - Registers AE and CNT resources if registration is set to 1.
+       - Sends sequential CSV data or random values depending on mode.
+       - For HTTP, checks POST result and verifies storage via `/la` when necessary.
+       - Retries on errors; terminates after repeated failures.
 
 FILES
        config.py
-              Configuration file defining key parameters such as server settings, transmission interval, file paths, and error thresholds.
+              Defines parameters such as server settings, transmission frequency, file paths, and error thresholds.
 
        mqtt_client.py
-              Module implementing a oneM2M-based client for MQTT transmission.
+              Implements oneM2M-compliant MQTT client for message transmission.
 
        HUMID_CSV (config.HUMID_CSV)
-              Path to the sensor data file used in CSV mode.
+              Path to the CSV file used in csv mode.
 
 ENVIRONMENT VARIABLES
-       All configurations are defined in config.py; environment variables are not used.
+       No environment variables are used; all settings are defined in config.py.
 
 EXIT STATUS
-       0      Normal termination.
+       0      Successful completion.
 
-       1      Termination due to configuration file errors, server connection failure, data file loading failure,
-              AE/CNT registration failure, or repeated transmission errors.
+       1      Exited due to configuration errors, server connection failure, data file errors, AE/CNT registration
+              failure, or repeated transmission failures.
 
 SEE ALSO
        mqtt_client.py(1), config.py(5), simulator_temp.py(1)
@@ -361,14 +353,11 @@ AUTHOR
        Author: Siwoo Park <parksw@sju.ac.kr>
 
 COPYRIGHT
-       This script does not follow an open license and may be freely used in local environments for testing and research purposes.
+       Freely usable in local environments for testing and research without any specific license.
 
-September 6, 2025                                                                                  SIMULATOR_HUMID.PY(1)
+April 06, 2025                                                                          SIMULATOR_HUMID.PY(1)
 
-
-### mqtt_client
-
-MQTT_CLIENT.PY(1)                          IoT MQTT Module Manual                              MQTT_CLIENT.PY(1)
+MQTT_CLIENT.PY(1)                           IoT MQTT Module Manual                           MQTT_CLIENT.PY(1)
 
 NAME
        mqtt_client.py - client module for performing MQTT communication based on oneM2M structure
@@ -377,42 +366,38 @@ SYNOPSIS
        from mqtt_client import MqttOneM2MClient
 
 DESCRIPTION
-       mqtt_client.py is a dedicated client module that handles sending and receiving messages through an MQTT broker
-       (mosquitto) in accordance with the oneM2M standard message format, including the creation of AE, CNT, and CIN.
-       It is mainly used in sensor simulators and can communicate with the tinyIoT platform or other oneM2M-compatible
-       CSEs.
+       mqtt_client.py is a dedicated client module that handles message transmission and reception via an MQTT
+       broker (mosquitto) in oneM2M-compliant format. It supports operations such as AE, CNT, and CIN creation.
+       It is mainly used by sensor simulators and can communicate with tinyIoT or other oneM2M-compatible CSEs.
 
 CLASS
        MqttOneM2MClient(broker, port, origin, cse_csi, cse_rn="TinyIoT")
-              Initializes the object with MQTT broker address, port, origin identifier, and CSE-ID.
-              Default request and response topics are set according to the oneM2M format.
+              Initializes an object with broker address, port, origin identifier, and CSE-ID. Request and response
+              topics are set according to the oneM2M format.
 
 METHODS
        connect()
-              Connects to the MQTT broker and subscribes to the response topic.
-              Returns True if the connection succeeds, otherwise False.
+              Connects to the MQTT broker and subscribes to the response topic. Returns True on success, False on
+              failure.
 
        disconnect()
               Terminates the MQTT connection and stops the loop.
 
        create_ae(ae_name)
-              Sends a request to create an AE (Application Entity).
-              If the AE already exists, it proceeds without error.
-              Returns True or False depending on the result.
+              Sends a request to create an AE (Application Entity). Continues without error if already existing.
+              Returns True or False depending on result.
 
        create_cnt(ae_name, cnt_name)
-              Creates a CNT (Container) under the specified AE.
-              If it already exists, the request is ignored.
+              Creates a CNT (Container) under the given AE. Ignores duplicate creation.
 
        send_cin(ae_name, cnt_name, value)
-              Sends a ContentInstance (CIN) to the specified container.
-              The value is a string and is wrapped in oneM2M format before transmission.
+              Sends a ContentInstance (CIN) to the specified container. Value is sent as a string in oneM2M format.
 
 INTERNAL LOGIC
-       - All transmission requests are handled inside the _send_request() function, where a UUID-based request ID (rqi) is automatically generated.
-       - Response reception is handled using the response_received event and the on_message callback.
-       - If no response is received within a specified timeout (default 5 seconds), it is treated as a timeout.
-       - Response codes (rsc) are evaluated based on oneM2M standard codes (e.g., 2001: created, 4105: already exists).
+       - All requests are sent via the internal _send_request() function with UUID-based request IDs (rqi).
+       - Responses are processed through the response_received event and the on_message callback.
+       - Requests are considered timed out if no response is received within 5 seconds.
+       - Response codes (rsc) are checked according to oneM2M standards (e.g., 2001: created, 4105: already exists).
 
 TOPICS
        Request Topic:
@@ -439,12 +424,9 @@ AUTHOR
        Author: Siwoo Park <parksw@sju.ac.kr>
 
 COPYRIGHT
-       This module is freely available for research and development purposes for MQTT-based IoT communication.
+       This module is freely usable for research and development of MQTT-based IoT communication.
 
-September 2025                                                                           MQTT_CLIENT.PY(1)
-
-
-### config
+April 06, 2025                                                                              MQTT_CLIENT.PY(1)
 
 CONFIG.PY(5)                       IoT Script & Simulator Configuration                       CONFIG.PY(5)
 
@@ -533,5 +515,5 @@ AUTHOR
 COPYRIGHT
        Freely usable in research and experimental simulation environments.
 
-April 06, 2025                                                                           CONFIG.PY(5)
-
+April 06, 2025                                                                                  CONFIG.PY(5)
+```
