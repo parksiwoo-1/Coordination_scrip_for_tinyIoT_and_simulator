@@ -142,7 +142,7 @@ For more detailed descriptions of the options, refer to the man page.
 
 
 
-6. Run Coordination Script & Simulator
+5. Run Coordination Script & Simulator
 
 ```bash
 python3 coordination.py
