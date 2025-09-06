@@ -223,6 +223,9 @@ COPYRIGHT
 
 April 06, 2025                                                                              COORDINATION.PY(1)
 
+
+
+
 SIMULATOR_TEMP.PY(1)                        IoT Sensor Simulator Manual                        SIMULATOR_TEMP.PY(1)
 
 NAME
@@ -290,6 +293,8 @@ COPYRIGHT
 
 April 06, 2025                                                                           SIMULATOR_TEMP.PY(1)
 
+
+
 SIMULATOR_HUMID.PY(1)                       IoT Sensor Simulator Manual                        SIMULATOR_HUMID.PY(1)
 
 NAME
@@ -356,6 +361,8 @@ COPYRIGHT
        Freely usable in local environments for testing and research without any specific license.
 
 April 06, 2025                                                                          SIMULATOR_HUMID.PY(1)
+
+
 
 MQTT_CLIENT.PY(1)                           IoT MQTT Module Manual                           MQTT_CLIENT.PY(1)
 
@@ -427,6 +434,8 @@ COPYRIGHT
        This module is freely usable for research and development of MQTT-based IoT communication.
 
 April 06, 2025                                                                              MQTT_CLIENT.PY(1)
+
+
 
 CONFIG.PY(5)                       IoT Script & Simulator Configuration                       CONFIG.PY(5)
 
