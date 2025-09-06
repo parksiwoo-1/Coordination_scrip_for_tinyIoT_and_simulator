@@ -5,13 +5,13 @@ SERVER_EXEC = "/home/parks/tinyIoT/source/server/server"
 CSE_NAME = "tinyiot"   # csi (use topic)
 CSE_RN   = "TinyIoT"   # rn  (use MQTT payload "to")
 
-# HTTP (REST)
+# HTTP 
 HTTP_HOST = "127.0.0.1"
 HTTP_PORT = 3000  
 HTTP_BASE = f"http://{HTTP_HOST}:{HTTP_PORT}"
 CSE_URL = f"{HTTP_BASE}/{CSE_NAME}"
 
-# MQTT (Mosquitto)
+# MQTT (Mosquitto) 
 MQTT_HOST = "127.0.0.1"
 MQTT_PORT = 1883  # int
 
@@ -39,3 +39,4 @@ HUMID_PROFILE = {
     "min": 50,
     "max": 90,
 }
+
