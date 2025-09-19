@@ -9,12 +9,11 @@ The simulators follow the **oneM2M standard** and support both **HTTP** and **MQ
 
 ## File Structure
 - `coordination.py` – Main script to control the tinyIoT server and simulators  
-- `simulator_temp.py` – Temperature sensor simulator  
-- `simulator_humid.py` – Humidity sensor simulator  
-- `mqtt_client.py` – MQTT oneM2M communication module  
-- `config.py` – Global configuration values  
-- `test data/test_data_temp.csv` – Temperature CSV data  
-- `test data/test_data_humid.csv` – Humidity CSV data  
+- `simulator.py` – Temperature & Humidity sensor simulator (It is possible to add sensors to suit the user’s situation.)
+- `config_coord.py`- Global configuration values (coordiantion.py)    
+- `config_sim.py` – Global configuration values (simulator.py)  
+- `test_data_temp.csv` – Temperature CSV data  
+- `test_data_humid.csv` – Humidity CSV data  
 
 ## Features
 - **Integrated control** with `coordination.py`  
