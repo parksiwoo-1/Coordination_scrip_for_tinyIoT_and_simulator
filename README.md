@@ -17,12 +17,12 @@ The simulators follow the **oneM2M standard** and support both **HTTP** and **MQ
 
 ## Features
 - **Integrated control** with `coordination.py`  
-- **Temperature and humidity simulation**  
+- **Temperature and humidity simulation**
+- **Protocols**: Choose between **HTTP** or **MQTT**    
 - **Modes**  
   - `csv`: Sends data from CSV files in sequence  
   - `random`: Generates random data within configured ranges  
-- **Protocols**: Choose between **HTTP** or **MQTT**  
-- **Automatic registration**: Create oneM2M AE/CNT resources with `-Registration` option  
+- **Automatic registration**: Create oneM2M AE/CNT resources with `--Registration` option  
 
 ## Environment
 - **OS**: Ubuntu 24.04.2 LTS  
@@ -35,21 +35,12 @@ The simulators follow the **oneM2M standard** and support both **HTTP** and **MQ
 
 ## Installation
 
-### Python Libraries
-```bash
-pip install requests
-```
-```bash
-pip install paho-mqtt
-```
 
 ### tinyIoT Setup
 - Access the tinyIoT GitHub repository
 ```bash
 [Clone and build tinyIoT](https://github.com/seslabSJU/tinyIoT) according to its README.
 ```
-
-
 
 
 - tinyIoT config.h settings
@@ -65,48 +56,11 @@ pip install paho-mqtt
 <img width="641" height="397" alt="image" src="https://github.com/user-attachments/assets/6b856bbc-0dc7-46b9-bcd9-9a606407592f" />
 
 
-### MQTT Broker (Mosquitto) Setup
-- **Mosquitto installation required**
-
-1. Visit the website  
-   [https://mosquitto.org](https://mosquitto.org)  
-
-2. Click **Download** in website
-
-3. For Windows, download the x64 installer:
-
-
-```bash   
-mosquitto-2.0.22-install-windows-x64.exe
-```
-
-
-4. Edit mosquitto.conf:
-
-- add #listener 1883, #protocol mqtt
-
-
-<img width="2043" height="282" alt="image" src="https://github.com/user-attachments/assets/6c97477f-eb28-4d64-b71a-f249ff1336cb" />
-
-
-5 Run  
-Execute in Windows PowerShell using WSL:  
-
-
+### simulator Setup
 ```bash
-sudo systemctl start mosquitto
+https://github.com/parksiwoo-1/Device_simulator_for_tinyIoT
 ```
-
-
-```bash
-sudo systemctl status mosquitto
-```
-
-
-<img width="2162" height="632" alt="image" src="https://github.com/user-attachments/assets/bad124a0-6891-43fe-8ed4-8a9bef79c4ea" />
-
-
-If it shows "active (running)" as in the image above, the broker setup is complete.
+Go to the relevant URL and set up the environment according to the README on the simulator’s GitHub.
 
 
 ## Run Coordination Script & Device Simulators
