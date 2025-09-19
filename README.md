@@ -36,7 +36,7 @@ The simulators follow the **oneM2M standard** and support both **HTTP** and **MQ
 ## Installation
 
 
-### tinyIoT Setup 
+### 1. tinyIoT Setup 
 #### (If you’ve already completed the tinyIoT environment setup from the simulator.py GitHub repository, you can omit this.)
 
 - Access the tinyIoT GitHub repository
@@ -58,7 +58,7 @@ The simulators follow the **oneM2M standard** and support both **HTTP** and **MQ
 <img width="641" height="397" alt="image" src="https://github.com/user-attachments/assets/6b856bbc-0dc7-46b9-bcd9-9a606407592f" />
 
 
-### simulator Setup
+### 2. simulator Setup
 ```bash
 https://github.com/parksiwoo-1/Device_simulator_for_tinyIoT
 ```
@@ -80,11 +80,10 @@ cd tinyIoT/script   #example path
 git clone https://github.com/parksiwoo-1/Coordination_script_and_Device_simulators_for_tinyIoT
 ```
 
-3. Enter the cloned directory
 
-```bash
-cd tinyIoT/script   # example path
-```
+3. In config_coord.py, for images other than Ubuntu, set the path to simulator.py to match the user’s environment.
+   <img width="1009" height="124" alt="스크린샷 2025-09-19 124250" src="https://github.com/user-attachments/assets/10aa2188-b539-44fc-ba26-6cdddc9b142c" />
+
 
 4. Set the options in `coordination.py`.  
 More detailed option settings can be configured in `config.py`.
@@ -98,9 +97,14 @@ For more detailed descriptions of the options, refer to the man page.
 - registration : 0 or 1 (Enable AE/CNT auto-registration)
 
 
+5. Enter the cloned directory
+
+```bash
+cd tinyIoT/script   # example path
+```
 
 
-5. Run Coordination Script & Simulator
+6. Run Coordination Script & Simulator
 
 ```bash
 python3 coordination.py
