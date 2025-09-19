@@ -1,16 +1,18 @@
+import os
 import subprocess
 import sys
-import time
 import requests
-import config
+import config_coord as config
 
-def wait_for_server(timeout=config.WAIT_SERVER_TIMEOUT):
+def wait_for_server(timeout=getattr(config, 'WAIT_SERVER_TIMEOUT', 30)):
     print("[COORD] Waiting for server response...")
     headers = {'X-M2M-Origin': 'CAdmin', 'X-M2M-RVI': '3', 'X-M2M-RI': 'healthcheck'}
     url = f"{config.CSE_URL}"
+    req_timeout = getattr(config, 'REQUEST_TIMEOUT', 2)
+
     for _ in range(timeout):
         try:
-            res = requests.get(url, headers=headers, timeout=2)
+            res = requests.get(url, headers=headers, timeout=req_timeout)
             if res.status_code == 200:
                 print("[COORD] tinyIoT server is responsive.")
                 return True
@@ -19,7 +21,7 @@ def wait_for_server(timeout=config.WAIT_SERVER_TIMEOUT):
     print("[ERROR] Unable to connect to tinyIoT server.")
     return False
 
-def wait_for_process(name, timeout=config.WAIT_PROCESS_TIMEOUT):
+def wait_for_process(name, timeout=getattr(config, 'WAIT_PROCESS_TIMEOUT', 30)):
     print(f"[COORD] Checking process: {name}...")
     for _ in range(timeout):
         try:
@@ -35,54 +37,45 @@ def wait_for_process(name, timeout=config.WAIT_PROCESS_TIMEOUT):
 if __name__ == '__main__':
     print("[COORD] Starting tinyIoT server...")
     server_proc = subprocess.Popen([config.SERVER_EXEC])
-    time.sleep(config.PROCESS_START_DELAY)
 
     if not wait_for_server():
         try: server_proc.terminate()
         except Exception: pass
         sys.exit(1)
 
-    PROTOCOL_1     = 'mqtt'     # http OR mqtt
-    MODE_1         = 'random'   # csv OR random
-    FREQUENCY_1    = 2          # seconds
-    REGISTRATION_1 = 1          # 0 OR 1
+    PROTOCOL_1     = 'mqtt'
+    MODE_1         = 'random'
+    FREQUENCY_1    = 2
+    REGISTRATION_1 = 1
 
-    PROTOCOL_2     = 'mqtt'     # http OR mqtt
-    MODE_2         = 'random'   # csv OR random
-    FREQUENCY_2    = 2          # seconds
-    REGISTRATION_2 = 1          # 0 OR 1
+    PROTOCOL_2     = 'mqtt'
+    MODE_2         = 'random'
+    FREQUENCY_2    = 2
+    REGISTRATION_2 = 1
 
-    print("[COORD] Starting simulator_temp...")
-    device1 = subprocess.Popen([
-        'python3', 'simulator_temp.py',
+    python_exec = getattr(config, 'PYTHON_EXEC', 'python3')
+    simulator_path = config.SIMULATOR_PATH
+
+    sim_args = [
+        python_exec, simulator_path,
+        '--sensor', 'temp',
         '--protocol', PROTOCOL_1,
         '--mode', MODE_1,
         '--frequency', str(FREQUENCY_1),
         '--registration', str(REGISTRATION_1),
-    ])
-
-    if not wait_for_process("simulator_temp.py"):
-        print("[ERROR] Failed to start simulator_temp. Exiting.")
-        try: device1.terminate()
-        except Exception: pass
-        try: server_proc.terminate()
-        except Exception: pass
-        sys.exit(1)
-
-    print("[COORD] Starting simulator_humid...")
-    device2 = subprocess.Popen([
-        'python3', 'simulator_humid.py',
+        '--sensor', 'humid',
         '--protocol', PROTOCOL_2,
         '--mode', MODE_2,
         '--frequency', str(FREQUENCY_2),
         '--registration', str(REGISTRATION_2),
-    ])
+    ]
 
-    if not wait_for_process("simulator_humid.py"):
-        print("[ERROR] Failed to start simulator_humid. Exiting.")
-        try: device2.terminate()
-        except Exception: pass
-        try: device1.terminate()
+    print("[COORD] Starting simulator (single process)...")
+    sim_proc = subprocess.Popen(sim_args)
+    sim_name = os.path.basename(simulator_path)
+    if not wait_for_process(sim_name):
+        print("[ERROR] Failed to start simulator. Exiting.")
+        try: sim_proc.terminate()
         except Exception: pass
         try: server_proc.terminate()
         except Exception: pass
@@ -93,7 +86,7 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("\n[COORD] Shutting down (KeyboardInterrupt)...")
     finally:
-        for p in (device1, device2):
+        for p in (sim_proc,):
             try: p.terminate()
             except Exception: pass
         try: server_proc.terminate()
