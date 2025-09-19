@@ -37,7 +37,7 @@ The simulators follow the **oneM2M standard** and support both **HTTP** and **MQ
 
 
 ### tinyIoT Setup 
-#### If you’ve already completed the tinyIoT environment setup from the simulator.py GitHub repository, you can omit this.
+#### (If you’ve already completed the tinyIoT environment setup from the simulator.py GitHub repository, you can omit this.)
 
 - Access the tinyIoT GitHub repository
 ```bash
