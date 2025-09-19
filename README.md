@@ -1,4 +1,4 @@
-# Coordination Script and Device Simulators for tinyIoT
+# Coordination Script for tinyIoT and simulator
 
 ## Overview
 This project provides:
