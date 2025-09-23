@@ -9,12 +9,10 @@ SIMULATOR_PATH = "/home/parks/tinyIoT/simulator/simulator.py"
 # Python interpreter used to launch the simulator
 PYTHON_EXEC = "python3"
 
-
 # ------------------- Health Check URL -------------------
 # OneM2M CSE HTTP endpoint used for server readiness checks.
 # NOTE: CSI is lowercase ("tinyiot"). Change only if your CSE path differs.
 CSE_URL = "http://127.0.0.1:3000/tinyiot"
-
 
 # ---------------- Timeouts & Retries ----------------
 # Number of attempts for server readiness polling (1 attempt ~ 1 second)
