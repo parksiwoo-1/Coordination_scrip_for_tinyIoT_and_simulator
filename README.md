@@ -1,14 +1,14 @@
-# Coordination Script for tinyIoT and simulator
+# Coordinator Script for tinyIoT and device simulator
 
 ## Overview
 This project provides:
 - **Device simulators** for sending arbitrary temperature and humidity data to a tinyIoT server  
-- A **coordination script** to control and manage all processes  
+- A **coordinator script** to control and manage all processes  
 
 The simulators follow the **oneM2M standard** and support both **HTTP** and **MQTT** protocols for data transmission.  
 
 ## File Structure
-- `coordination.py` – Main script to control the tinyIoT server and simulators  
+- `coordinator.py` – Main script to control the tinyIoT server and simulators  
 - `simulator.py` – Temperature & Humidity sensor simulator (It is possible to add sensors to suit the user’s situation.)
 - `config_coord.py`- Global configuration values (coordiantion.py)    
 - `config_sim.py` – Global configuration values (simulator.py)  
@@ -63,7 +63,7 @@ https://github.com/parksiwoo-1/Device_simulator_for_tinyIoT
 Go to the relevant URL and set up the environment according to the README on the simulator’s GitHub.
 
 
-## Run Coordination Script & Device Simulators
+## Run the Device Simulator Using the Coordinator Script
 ### Clone Repository
 1. Navigate to the directory where you want to clone in Ubuntu:
 
