@@ -13,6 +13,27 @@ from typing import List, Optional
 logging.basicConfig(level=getattr(config, 'LOG_LEVEL', logging.INFO), format='[%(levelname)s] %(message)s')
 
 
+class SensorConfig:
+    """Configuration bundle describing a sensor simulator launch request."""
+    def __init__(self, sensor_type: str, protocol: str = 'mqtt', mode: str = 'random',
+                 frequency: int = 2, registration: int = 1) -> None:
+        self.sensor_type = sensor_type
+        self.protocol = protocol
+        self.mode = mode
+        self.frequency = frequency
+        self.registration = registration
+
+
+# Coordinator options. Users can add or remove sensors here to suit their setup.
+# Sensor names must not contain spaces.
+SENSORS_TO_RUN: List[SensorConfig] = [
+    SensorConfig('temp',  protocol='http', mode='random', frequency=3, registration=1),
+    SensorConfig('humid', protocol='http', mode='random', frequency=3, registration=1),
+    SensorConfig('co2',   protocol='http', mode='random', frequency=3, registration=1),
+    SensorConfig('soil',  protocol='http', mode='random', frequency=3, registration=1)
+]
+
+
 def wait_for_server(timeout: int = getattr(config, 'WAIT_SERVER_TIMEOUT', 30)) -> bool:
     """Poll the HTTP endpoint until the CSE responds with 200 OK."""
     headers = {'X-M2M-Origin': 'CAdmin', 'X-M2M-RVI': '3', 'X-M2M-RI': 'healthcheck'}
@@ -45,18 +66,6 @@ def wait_for_process(name: str, timeout: int = getattr(config, 'WAIT_PROCESS_TIM
         time.sleep(1)
     logging.error(f"[COORD] Failed to detect running process: {name}.")
     return False
-
-
-class SensorConfig:
-    """Configuration bundle describing a sensor simulator launch request."""
-    def __init__(self, sensor_type: str, protocol: str = 'mqtt', mode: str = 'random',
-                 frequency: int = 2, registration: int = 1) -> None:
-        self.sensor_type = sensor_type
-        self.protocol = protocol
-        self.mode = mode
-        self.frequency = frequency
-        self.registration = registration
-
 
 
 class SimulatorHandle:
@@ -120,14 +129,6 @@ class SimulatorHandle:
         """Join the stdout reader thread to avoid leaking daemon threads."""
         if self._reader.is_alive():
             self._reader.join(timeout)
-
-SENSORS_TO_RUN: List[SensorConfig] = [
-    SensorConfig('temp',  protocol='http', mode='random', frequency=3, registration=1),
-    SensorConfig('humid', protocol='http', mode='random', frequency=3, registration=1),
-    SensorConfig('co2',   protocol='http', mode='random', frequency=3, registration=1),
-    SensorConfig('soil',  protocol='http', mode='random', frequency=3, registration=1)
-]
-
 
 def launch_simulator(sensor_config: SensorConfig, index: int) -> Optional[SimulatorHandle]:
     """Spawn one simulator process and return a handle on success."""
