@@ -1,3 +1,11 @@
+"""Configuration values for the coordination launcher and child device simulators."""
+
+# --------------- Duplicate Handling ---------------
+# Coordination runs are non-interactive, so pick an explicit policy.
+#   'yes' -> auto-reuse existing resources without prompting
+#   'no'  -> abort immediately on duplicates
+SIMULATOR_REUSE_EXISTING = "yes"
+
 # ----------------------- Paths -----------------------
 # Absolute or relative path to the tinyIoT server binary
 SERVER_EXEC = "/home/parks/tinyIoT/source/server/server"
