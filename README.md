@@ -88,8 +88,11 @@ git clone https://github.com/parksiwoo-1/Coordination_script_and_Device_simulato
   <img width="907" height="121" alt="image" src="https://github.com/user-attachments/assets/bf000381-91d1-47bb-af20-2f15d8dbe9e2" />
 
 4. option setting in coordinator.py
+- Users can add or remove sensors here to suit their setup.
+<img width="1029" height="249" alt="image" src="https://github.com/user-attachments/assets/1e821675-30fe-4b6c-9a57-e1947088ae05" />
 
-5. Set the options in `coordinator.py`.  
+
+6. Set the options in `coordinator.py`.  
 More detailed option settings can be configured in `config_coord.py`.
 For more detailed descriptions of the options, refer to the man page.
 - protocol : HTTP or MQTT
