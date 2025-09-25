@@ -44,7 +44,7 @@ The simulators follow the **oneM2M standard** and support both **HTTP** and **MQ
 
 
 - tinyIoT config.h settings
-1. Verify that the following settings are correctly configured:
+1. Verify that the following settings are correctly configured (Configure the IP and port as appropriate for your setup):
 
 
 <img width="684" height="241" alt="image" src="https://github.com/user-attachments/assets/705a3ac5-4dec-4bbc-b35a-976ae12d600b" />
