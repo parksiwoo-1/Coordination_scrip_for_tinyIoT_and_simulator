@@ -12,5 +12,4 @@ CSE_URL = "http://127.0.0.1:3000/tinyiot"
 
 # ---------------- Timeouts & Retries ----------------
 WAIT_SERVER_TIMEOUT = 30  # seconds
-WAIT_PROCESS_TIMEOUT = 10  # seconds
 REQUEST_TIMEOUT = 2  # seconds
