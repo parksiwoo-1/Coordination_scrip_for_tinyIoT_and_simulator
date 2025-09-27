@@ -11,6 +11,16 @@ PYTHON_EXEC = "python3"
 # configure for your environment
 CSE_URL = "http://127.0.0.1:3000/tinyiot"
 
+# -------------------- HTTP Headers --------------------
+# Common headers used by the health-check GET request
+# configure for your environment
+HEALTHCHECK_HEADERS = {
+    "X-M2M-Origin": "CAdmin",
+    "X-M2M-RVI": "3",
+    "X-M2M-RI": "healthcheck",
+    "Accept": "application/json",
+}
+
 # ---------------- Timeouts & Retries ----------------
 WAIT_SERVER_TIMEOUT = 30   # seconds
 REQUEST_TIMEOUT = 2        # seconds
