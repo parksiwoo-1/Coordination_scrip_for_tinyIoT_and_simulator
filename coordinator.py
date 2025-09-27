@@ -110,7 +110,6 @@ class SimulatorHandle:
                 return False
 
     def terminate(self) -> None:
-        """Politely terminate the simulator process if still running."""
         if self.proc and self.proc.poll() is None:
             try:
                 self.proc.terminate()
@@ -118,7 +117,6 @@ class SimulatorHandle:
                 pass
 
     def kill(self) -> None:
-        """Force kill the simulator process if termination failed."""
         if self.proc and self.proc.poll() is None:
             try:
                 self.proc.kill()
@@ -126,9 +124,9 @@ class SimulatorHandle:
                 pass
 
     def join_reader(self, timeout: float = 1.0) -> None:
-        """Join the stdout reader thread to avoid leaking daemon threads."""
         if self._reader.is_alive():
             self._reader.join(timeout)
+
 
 def launch_simulator(sensor_config: SensorConfig, index: int) -> Optional[SimulatorHandle]:
     """Spawn one simulator process and return a handle on success."""
@@ -142,14 +140,6 @@ def launch_simulator(sensor_config: SensorConfig, index: int) -> Optional[Simula
         '--frequency', str(sensor_config.frequency),
         '--registration', str(sensor_config.registration),
     ]
-    reuse_existing = str(getattr(config, 'SIMULATOR_REUSE_EXISTING', 'yes')).lower()
-    if reuse_existing not in {'yes', 'no'}:
-        logging.warning(
-            "[COORD] Invalid SIMULATOR_REUSE_EXISTING value '%s'; falling back to 'no'.",
-            reuse_existing
-        )
-        reuse_existing = 'no'
-    sim_args.extend(['--reuse-existing', reuse_existing])
     logging.info(f"[COORD] Starting simulator #{index + 1} ({sensor_config.sensor_type} sensor)...")
     logging.debug(f"[COORD] Command: {' '.join(sim_args)}")
     env = os.environ.copy()
@@ -170,6 +160,7 @@ def launch_simulator(sensor_config: SensorConfig, index: int) -> Optional[Simula
     except Exception as e:
         logging.error(f"[COORD] Failed to start simulator #{index + 1}: {e}")
         return None
+
 
 if __name__ == '__main__':
     logging.info("[COORD] Starting tinyIoT server...")
