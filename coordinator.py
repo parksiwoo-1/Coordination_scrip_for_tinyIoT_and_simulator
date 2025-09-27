@@ -37,8 +37,8 @@ class SensorConfig:
 # Coordinator options. Users can add or remove sensors here to suit their setup.
 # Sensor names must not contain spaces.
 SENSORS_TO_RUN: List[SensorConfig] = [
-    SensorConfig('temp',  protocol='mqtt', mode='csv', frequency=3, registration=1),
-    SensorConfig('humid', protocol='mqtt', mode='csv', frequency=3, registration=1),
+    SensorConfig('temp',  protocol='http', mode='csv', frequency=3, registration=1),
+    SensorConfig('humid', protocol='http', mode='csv', frequency=3, registration=1),
     SensorConfig('co2',   protocol='mqtt', mode='random', frequency=3, registration=1),
     SensorConfig('soil',  protocol='mqtt', mode='random', frequency=3, registration=1)
 ]
@@ -46,12 +46,11 @@ SENSORS_TO_RUN: List[SensorConfig] = [
 
 def wait_for_server(timeout: int = getattr(config, 'WAIT_SERVER_TIMEOUT', 30)) -> bool:
     """Poll the CSE health endpoint until 200 OK (up to `timeout` retries)."""
-    headers = {'X-M2M-Origin': 'CAdmin', 'X-M2M-RVI': '3', 'X-M2M-RI': 'healthcheck'}
     url = f"{config.CSE_URL}"
     req_timeout = getattr(config, 'REQUEST_TIMEOUT', 2)
     for _ in range(timeout):
         try:
-            res = requests.get(url, headers=headers, timeout=req_timeout)
+            res = requests.get(url, headers=getattr(config, "HEALTHCHECK_HEADERS", {}), timeout=req_timeout)
             if res.status_code == 200:
                 logging.info("[COORD] tinyIoT server is responsive.")
                 return True
@@ -171,7 +170,7 @@ if __name__ == '__main__':
         logging.error(f"[COORD] Failed to start tinyIoT server: {e}")
         sys.exit(1)
 
-    # Wait for server health; abort if not ready.
+    # Wait for server health; terminate if not ready.
     if not wait_for_server():
         try:
             server_proc.terminate()
@@ -194,8 +193,8 @@ if __name__ == '__main__':
                 logging.info(f"[COORD] Simulator [{sensor_conf.sensor_type}] ready.")
                 simulator_handles.append(handle)
             else:
-                # Abort remaining startes if a simulator fails setup.
-                logging.error(f"[COORD] Simulator [{sensor_conf.sensor_type}] failed during setup; aborting start sequence.")
+                # Stop starting additional simulators if one fails during setup.
+                logging.error(f"[COORD] Simulator [{sensor_conf.sensor_type}] failed during setup; terminating start sequence.")
                 handle.terminate()
                 handle.join_reader()
                 break
