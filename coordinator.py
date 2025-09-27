@@ -27,10 +27,10 @@ class SensorConfig:
 # Coordinator options. Users can add or remove sensors here to suit their setup.
 # Sensor names must not contain spaces.
 SENSORS_TO_RUN: List[SensorConfig] = [
-    SensorConfig('temp',  protocol='http', mode='random', frequency=3, registration=1),
-    SensorConfig('humid', protocol='http', mode='random', frequency=3, registration=1),
-    SensorConfig('co2',   protocol='http', mode='random', frequency=3, registration=1),
-    SensorConfig('soil',  protocol='http', mode='random', frequency=3, registration=1)
+    SensorConfig('temp',  protocol='mqtt', mode='random', frequency=3, registration=1),
+    SensorConfig('humid', protocol='mqtt', mode='random', frequency=3, registration=1),
+    SensorConfig('co2',   protocol='mqtt', mode='random', frequency=3, registration=1),
+    SensorConfig('soil',  protocol='mqtt', mode='random', frequency=3, registration=1)
 ]
 
 
@@ -52,22 +52,6 @@ def wait_for_server(timeout: int = getattr(config, 'WAIT_SERVER_TIMEOUT', 30)) -
     return False
 
 
-def wait_for_process(name: str, timeout: int = getattr(config, 'WAIT_PROCESS_TIMEOUT', 30)) -> bool:
-    """Return True when a process matching *name* is detected within timeout."""
-    logging.info(f"[COORD] Checking process: {name}...")
-    for _ in range(timeout):
-        try:
-            out = subprocess.check_output(['pgrep', '-f', name])
-            if out:
-                logging.info(f"[COORD] {name} is running.")
-                return True
-        except subprocess.CalledProcessError:
-            pass
-        time.sleep(1)
-    logging.error(f"[COORD] Failed to detect running process: {name}.")
-    return False
-
-
 class SimulatorHandle:
     """Wrapper that watches simulator output and exposes readiness helpers."""
     def __init__(self, proc: subprocess.Popen, sensor_type: str) -> None:
@@ -82,7 +66,7 @@ class SimulatorHandle:
         tag = f"[{self.sensor_type.upper()}]"
         try:
             for line in self.proc.stdout:
-                text = line.rstrip('\n')
+                text = line.rstrip('\r\n')
                 print(text, flush=True)
                 if text.startswith(f"{tag} run "):
                     self._ready.set()
@@ -140,7 +124,7 @@ def launch_simulator(sensor_config: SensorConfig, index: int) -> Optional[Simula
         '--frequency', str(sensor_config.frequency),
         '--registration', str(sensor_config.registration),
     ]
-    logging.info(f"[COORD] Starting simulator #{index + 1} ({sensor_config.sensor_type} sensor)...")
+    logging.info(f"[COORD] Starting simulator [{sensor_config.sensor_type}]...")
     logging.debug(f"[COORD] Command: {' '.join(sim_args)}")
     env = os.environ.copy()
     sim_env = getattr(config, 'SIM_ENV', None)
@@ -184,14 +168,14 @@ if __name__ == '__main__':
         for i, sensor_conf in enumerate(SENSORS_TO_RUN):
             handle = launch_simulator(sensor_conf, i)
             if not handle:
-                logging.error(f"[COORD] Failed to launch simulator #{i + 1}")
+                logging.error(f"[COORD] Failed to launch simulator [{sensor_conf.sensor_type}]")
                 continue
-            logging.info(f"[COORD] Waiting for simulator #{i + 1} ({sensor_conf.sensor_type}) to finish registration...")
+            logging.info(f"[COORD] Waiting for simulator [{sensor_conf.sensor_type}] to finish registration...")
             if handle.wait_until_ready():
-                logging.info(f"[COORD] Simulator #{i + 1} ready.")
+                logging.info(f"[COORD] Simulator [{sensor_conf.sensor_type}] ready.")
                 simulator_handles.append(handle)
             else:
-                logging.error(f"[COORD] Simulator #{i + 1} failed during setup; aborting launch sequence.")
+                logging.error(f"[COORD] Simulator [{sensor_conf.sensor_type}] failed during setup; aborting launch sequence.")
                 handle.terminate()
                 handle.join_reader()
                 break
@@ -206,7 +190,11 @@ if __name__ == '__main__':
             pass
         sys.exit(1)
 
-    logging.info(f"[COORD] Successfully started {len(simulator_handles)} simulator(s).")
+    if len(simulator_handles) == len(SENSORS_TO_RUN):
+        logging.info("[COORD] Successfully started all simulators.")
+    else:
+        logging.info(f"[COORD] Successfully started {len(simulator_handles)} simulator(s) "
+                     f"(out of {len(SENSORS_TO_RUN)}).")
 
     try:
         while True:
@@ -222,14 +210,14 @@ if __name__ == '__main__':
         logging.info("[COORD] Shutting down (KeyboardInterrupt)...")
     finally:
         logging.info("[COORD] Terminating all processes...")
-        for i, handle in enumerate(simulator_handles):
+        for handle in simulator_handles:
             if handle.proc and handle.proc.poll() is None:
                 try:
-                    logging.info(f"[COORD] Terminating simulator #{i + 1}...")
+                    logging.info(f"[COORD] Terminating simulator [{handle.sensor_type}]...")
                     handle.terminate()
                     handle.proc.wait(timeout=5)
                 except Exception as e:
-                    logging.warning(f"[COORD] Failed to terminate simulator #{i + 1}: {e}; killing...")
+                    logging.warning(f"[COORD] Failed to terminate simulator [{handle.sensor_type}]: {e}; killing...")
                     handle.kill()
             handle.join_reader()
         if server_proc and server_proc.poll() is None:
