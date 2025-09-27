@@ -27,10 +27,10 @@ class SensorConfig:
 # Coordinator options. Users can add or remove sensors here to suit their setup.
 # Sensor names must not contain spaces.
 SENSORS_TO_RUN: List[SensorConfig] = [
-    SensorConfig('temp',  protocol='mqtt', mode='random', frequency=3, registration=1),
-    SensorConfig('humid', protocol='mqtt', mode='random', frequency=3, registration=1),
-    SensorConfig('co2',   protocol='mqtt', mode='random', frequency=3, registration=1),
-    SensorConfig('soil',  protocol='mqtt', mode='random', frequency=3, registration=1)
+    SensorConfig('temp',  protocol='http', mode='random', frequency=3, registration=1),
+    SensorConfig('humid', protocol='http', mode='random', frequency=3, registration=1),
+    SensorConfig('co2',   protocol='http', mode='random', frequency=3, registration=1),
+    SensorConfig('soil',  protocol='http', mode='random', frequency=3, registration=1)
 ]
 
 
