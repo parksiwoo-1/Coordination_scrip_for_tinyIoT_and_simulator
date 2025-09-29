@@ -39,18 +39,19 @@ class SensorConfig:
 SENSORS_TO_RUN: List[SensorConfig] = [
     SensorConfig('temp',  protocol='http', mode='csv', frequency=3, registration=1),
     SensorConfig('humid', protocol='http', mode='csv', frequency=3, registration=1),
-    SensorConfig('co2',   protocol='mqtt', mode='random', frequency=3, registration=1),
-    SensorConfig('soil',  protocol='mqtt', mode='random', frequency=3, registration=1)
+    SensorConfig('co2',   protocol='mqtt', mode='csv', frequency=3, registration=1),
+    SensorConfig('soil',  protocol='mqtt', mode='csv', frequency=3, registration=1)
 ]
 
 
 def wait_for_server(timeout: int = getattr(config, 'WAIT_SERVER_TIMEOUT', 30)) -> bool:
-    """Poll the CSE health endpoint until 200 OK (up to `timeout` retries)."""
+    """Poll the HTTP endpoint until the CSE responds with 200 OK."""
+    headers = {'X-M2M-Origin': 'CAdmin', 'X-M2M-RVI': '3', 'X-M2M-RI': 'healthcheck'}
     url = f"{config.CSE_URL}"
     req_timeout = getattr(config, 'REQUEST_TIMEOUT', 2)
     for _ in range(timeout):
         try:
-            res = requests.get(url, headers=getattr(config, "HEALTHCHECK_HEADERS", {}), timeout=req_timeout)
+            res = requests.get(url, headers=headers, timeout=req_timeout)
             if res.status_code == 200:
                 logging.info("[COORD] tinyIoT server is responsive.")
                 return True
@@ -59,6 +60,7 @@ def wait_for_server(timeout: int = getattr(config, 'WAIT_SERVER_TIMEOUT', 30)) -
         time.sleep(1)
     logging.error("[COORD] Unable to connect to tinyIoT server.")
     return False
+
 
 
 class SimulatorHandle:
@@ -146,6 +148,7 @@ def start_simulator(sensor_config: SensorConfig, index: int) -> Optional[Simulat
     if isinstance(sim_env, dict):
         env.update(sim_env)
     env['PYTHONUNBUFFERED'] = '1'
+    env['SKIP_HEALTHCHECK'] = '1'
     try:
         proc = subprocess.Popen(
             sim_args,
