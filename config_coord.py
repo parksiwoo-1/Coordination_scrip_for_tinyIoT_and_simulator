@@ -8,10 +8,17 @@ PYTHON_EXEC = "python3"
 # Health-check target served by the oneM2M CSE.
 CSE_URL = "http://127.0.0.1:3000/tinyiot"
 
-# Launch definitions consumed by coordinator.SensorConfig.
+# Sensor Configuration
+# Users can add or remove sensors here to suit their setup.
+# Sensor names must not contain spaces and only lowercase.
+# --sensor: "temp" | "humid" | "co2" | "soil" | etc
+# --protocol: "http" | "mqtt"
+# --mode: "csv" | "random"
+# --frequency: seconds
+# --registration: 0 | 1
 SENSORS = [
-    {"sensor": "temp", "protocol": "http", "mode": "csv", "frequency": 3, "registration": 1},
-    {"sensor": "humid", "protocol": "http", "mode": "csv", "frequency": 3, "registration": 1},
+    {"sensor": "temperature", "protocol": "http", "mode": "csv", "frequency": 3, "registration": 1},
+    {"sensor": "humidity", "protocol": "http", "mode": "csv", "frequency": 3, "registration": 1},
     {"sensor": "co2", "protocol": "mqtt", "mode": "csv", "frequency": 3, "registration": 1},
     {"sensor": "soil", "protocol": "mqtt", "mode": "csv", "frequency": 3, "registration": 1},
 ]
