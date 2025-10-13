@@ -1,4 +1,4 @@
-"""start the tinyIoT server and a batch of sensor device simulators in sequence."""
+"""Start the tinyIoT server and a batch of sensor device simulators in sequence."""
 
 import subprocess
 import sys
@@ -34,19 +34,45 @@ class SensorConfig:
         self.registration = registration
 
 
-# Coordinator options. Users can add or remove sensors here to suit their setup.
-# Sensor names must not contain spaces.
-SENSORS_TO_RUN: List[SensorConfig] = [
-    SensorConfig('temp',  protocol='http', mode='csv', frequency=3, registration=1),
-    SensorConfig('humid', protocol='http', mode='csv', frequency=3, registration=1),
-    SensorConfig('co2',   protocol='mqtt', mode='csv', frequency=3, registration=1),
-    SensorConfig('soil',  protocol='mqtt', mode='csv', frequency=3, registration=1)
-]
+# Sensor definitions live in config_coord.SENSORS so deployments remain configurable
+# without modifying this module. Build the resolved objects once for reuse.
+
+
+def _load_sensor_configs() -> List[SensorConfig]:
+    """Build ``SensorConfig`` objects from ``config_coord.SENSORS``."""
+    raw_options = getattr(config, 'SENSORS', [])
+    sensors: List[SensorConfig] = []
+
+    for idx, option in enumerate(raw_options):
+        if isinstance(option, SensorConfig):
+            sensors.append(option)
+            continue
+        if isinstance(option, dict):
+            try:
+                sensor_kwargs = option.copy()
+                if 'sensor' in sensor_kwargs and 'sensor_type' not in sensor_kwargs:
+                    sensor_kwargs['sensor_type'] = sensor_kwargs.pop('sensor')
+                sensors.append(SensorConfig(**sensor_kwargs))
+            except TypeError as exc:
+                logging.error(
+                    f"[COORD] Invalid sensor option at index {idx}: {option!r} ({exc})"
+                )
+        else:
+            logging.error(
+                f"[COORD] Invalid sensor option type at index {idx}: {type(option)!r}"
+            )
+
+    if not sensors:
+        logging.warning("[COORD] No valid sensor options found; nothing will be started.")
+    return sensors
+
+
+SENSORS_TO_RUN: List[SensorConfig] = _load_sensor_configs()
 
 
 def wait_for_server(timeout: int = getattr(config, 'WAIT_SERVER_TIMEOUT', 30)) -> bool:
     """Poll the HTTP endpoint until the CSE responds with 200 OK."""
-    headers = {'X-M2M-Origin': 'CAdmin', 'X-M2M-RVI': '3', 'X-M2M-RI': 'healthcheck'}
+    headers = config.HEALTHCHECK_HEADERS
     url = f"{config.CSE_URL}"
     req_timeout = getattr(config, 'REQUEST_TIMEOUT', 2)
     for _ in range(timeout):
@@ -130,7 +156,7 @@ class SimulatorHandle:
 
 
 def start_simulator(sensor_config: SensorConfig, index: int) -> Optional[SimulatorHandle]:
-    """start one simulator subprocess with the given config and return a monitor handle (None on failure)."""
+    """Start one simulator subprocess and return a monitor handle (None on failure)."""
     python_exec = getattr(config, 'PYTHON_EXEC', 'python3')
     simulator_path = config.SIMULATOR_PATH
     sim_args = [
@@ -165,7 +191,7 @@ def start_simulator(sensor_config: SensorConfig, index: int) -> Optional[Simulat
 
 
 if __name__ == '__main__':
-    # Main: start server, start simulators, supervise, clean up.
+    # Launch the server, start simulators, supervise them, then clean up.
     logging.info("[COORD] Starting tinyIoT server...")
     try:
         server_proc = subprocess.Popen([config.SERVER_EXEC])
@@ -173,7 +199,7 @@ if __name__ == '__main__':
         logging.error(f"[COORD] Failed to start tinyIoT server: {e}")
         sys.exit(1)
 
-    # Wait for server health; terminate if not ready.
+    # Stop early if the server never reports healthy.
     if not wait_for_server():
         try:
             server_proc.terminate()
@@ -185,7 +211,7 @@ if __name__ == '__main__':
     logging.info(f"[COORD] starting {len(SENSORS_TO_RUN)} sensor simulators...")
 
     try:
-        # Sequential start; stop sequence on any setup failure.
+        # Start simulators sequentially and stop the sequence on failure.
         for i, sensor_conf in enumerate(SENSORS_TO_RUN):
             handle = start_simulator(sensor_conf, i)
             if not handle:
@@ -196,7 +222,7 @@ if __name__ == '__main__':
                 logging.info(f"[COORD] Simulator [{sensor_conf.sensor_type}] ready.")
                 simulator_handles.append(handle)
             else:
-                # Stop starting additional simulators if one fails during setup.
+                # Abort additional launches if one simulator fails during initialization.
                 logging.error(f"[COORD] Simulator [{sensor_conf.sensor_type}] failed during setup; terminating start sequence.")
                 handle.terminate()
                 handle.join_reader()
@@ -204,7 +230,7 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         logging.info("[COORD] start interrupted by user.")
 
-    # Nothing started: shut down server and exit.
+    # Shut down immediately if every simulator failed to launch.
     if not simulator_handles:
         logging.error("[COORD] No simulators were started successfully.")
         try:
@@ -217,7 +243,7 @@ if __name__ == '__main__':
     ok = len(simulator_handles)
     need = len(SENSORS_TO_RUN)
     if ok != need:
-        # Partial start: tear down survivors and stop the server.
+        # Tear down partially started runs to avoid inconsistent state.
         ok_names = [h.sensor_type for h in simulator_handles]
         need_names = [c.sensor_type for c in SENSORS_TO_RUN]
         fail_names = [n for n in need_names if n not in ok_names]
@@ -250,7 +276,7 @@ if __name__ == '__main__':
     logging.info("[COORD] Successfully started all simulators.")
 
     try:
-        # Supervisor loop: exit if server dies or all simulators stop.
+        # Monitor the processes until the server stops or every simulator exits.
         while True:
             if server_proc.poll() is not None:
                 logging.error("[COORD] tinyIoT server has stopped unexpectedly.")
@@ -263,7 +289,7 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         logging.info("[COORD] Shutting down (KeyboardInterrupt)...")
     finally:
-        # Cleanup: terminate children and server.
+        # Terminate all processes before exiting the coordinator.
         logging.info("[COORD] Terminating all processes...")
         for handle in simulator_handles:
             if handle.proc and handle.proc.poll() is None:
