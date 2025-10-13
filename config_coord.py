@@ -1,31 +1,32 @@
-"""Configuration for the coordinator script and child device simulators."""
+"""Coordinator configuration for the tinyIoT deployment."""
 
-# -------------------------- Paths --------------------------
-# configure for your environment
+# Update these paths to match the local binaries.
 SERVER_EXEC = "/home/parks/tinyIoT/source/server/server"
 SIMULATOR_PATH = "/home/parks/tinyIoT/simulator/simulator.py"
 PYTHON_EXEC = "python3"
 
-# -------------------- Health Check URL --------------------
-# OneM2M CSE HTTP endpoint used for server readiness checks.
-# configure for your environment
+# Health-check target served by the oneM2M CSE.
 CSE_URL = "http://127.0.0.1:3000/tinyiot"
 
-# -------------------- HTTP Headers --------------------
-# Common headers used by the health-check GET request
-# configure for your environment
+# Launch definitions consumed by coordinator.SensorConfig.
+SENSORS = [
+    {"sensor": "temp", "protocol": "http", "mode": "csv", "frequency": 3, "registration": 1},
+    {"sensor": "humid", "protocol": "http", "mode": "csv", "frequency": 3, "registration": 1},
+    {"sensor": "co2", "protocol": "mqtt", "mode": "csv", "frequency": 3, "registration": 1},
+    {"sensor": "soil", "protocol": "mqtt", "mode": "csv", "frequency": 3, "registration": 1},
+]
+
+# Headers forwarded with the health-check GET call.
 HEALTHCHECK_HEADERS = {
     "X-M2M-Origin": "CAdmin",
-    "X-M2M-RVI": "3",
+    "X-M2M-RVI": "2a",
     "X-M2M-RI": "healthcheck",
     "Accept": "application/json",
 }
 
-# ---------------- Timeouts & Retries ----------------
-WAIT_SERVER_TIMEOUT = 30   # seconds
-REQUEST_TIMEOUT = 2        # seconds
-
-# Cleanup timings used when a simulator or the server fails to shut down promptly.
-PROC_TERM_WAIT = 5.0       # seconds
-SERVER_TERM_WAIT = 5.0     # seconds
-JOIN_READER_TIMEOUT = 1.0  # seconds
+# Timeout knobs expressed in seconds.
+WAIT_SERVER_TIMEOUT = 30
+REQUEST_TIMEOUT = 2
+PROC_TERM_WAIT = 5.0
+SERVER_TERM_WAIT = 5.0
+JOIN_READER_TIMEOUT = 1.0
